@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Вход / Выход', ~{::body-content})}">
+<body>
+<div th:fragment="body-content">
+
+    <h4 class="fw-bold mb-4"><i class="bi bi-door-open me-2"></i>Вход / Выход</h4>
+
+    <div class="row g-4">
+
+        <!-- Левая колонка: Регистрация входа -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-semibold bg-success text-white">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Регистрация входа
+                </div>
+                <div class="card-body">
+                    <!-- Поиск клиента -->
+                    <form class="mb-3" method="get" action="/visits">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="q"
+                                   th:value="${param.q}" placeholder="Поиск клиента..."/>
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <a th:if="${param.q}" href="/visits" class="btn btn-outline-danger">
+                                <i class="bi bi-x"></i>
+                            </a>
+                        </div>
+                    </form>
+
+                    <div th:if="${#lists.isEmpty(clients)}" class="text-muted text-center py-4">
+                        <i class="bi bi-person-x fs-2 d-block mb-2"></i>
+                        Клиенты не найдены
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(clients)}" class="list-group">
+                        <div th:each="client : ${clients}" class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-semibold" th:text="${client.fullName}"></span>
+                                    <span th:if="${client.gender != null}" class="badge ms-2"
+                                          th:classappend="${client.gender.name() == 'MALE'} ? 'bg-primary' : 'bg-danger'">
+                                        <i th:class="${client.gender.name() == 'MALE'} ? 'bi bi-gender-male' : 'bi bi-gender-female'"></i>
+                                    </span>
+                                    <br/>
+                                    <small class="text-muted" th:text="${client.phone}"></small>
+                                </div>
+                            </div>
+                            <form th:action="@{/visits/checkin/{id}(id=${client.id})}" method="post" class="mt-2">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <select name="lockerId" class="form-select form-select-sm" style="max-width: 200px;" required>
+                                        <option value="">Выберите шкафчик</option>
+                                        <th:block th:if="${clientLockers.get(client.id) != null}">
+                                            <option th:each="locker : ${clientLockers.get(client.id)}"
+                                                    th:value="${locker.id}"
+                                                    th:text="'№' + ${locker.lockerNumber}"></option>
+                                        </th:block>
+                                    </select>
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка: Сейчас в зале -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-semibold bg-warning text-dark">
+                    <i class="bi bi-people me-1"></i>Сейчас в зале
+                    <span class="badge bg-dark ms-2" th:text="${#lists.size(currentVisits)}"></span>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(currentVisits)}" class="text-muted text-center py-4">
+                        <i class="bi bi-emoji-neutral fs-2 d-block mb-2"></i>
+                        В зале никого нет
+                    </div>
+
+                    <table th:unless="${#lists.isEmpty(currentVisits)}" class="table table-hover mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Клиент</th>
+                            <th>Шкафчик</th>
+                            <th>Вход</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="visit : ${currentVisits}">
+                            <td>
+                                <a th:href="@{/clients/{id}(id=${visit.client.id})}"
+                                   class="text-decoration-none fw-semibold"
+                                   th:text="${visit.client.fullName}"></a>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">№<span th:text="${visit.locker.lockerNumber}"></span></span>
+                            </td>
+                            <td th:text="${#temporals.format(visit.checkIn, 'HH:mm')}"></td>
+                            <td class="text-end">
+                                <form th:action="@{/visits/checkout/{id}(id=${visit.client.id})}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-box-arrow-right me-1"></i>Выход
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

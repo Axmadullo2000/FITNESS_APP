@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Шкафчики', ~{::body-content})}">
+<body>
+<div th:fragment="body-content">
+
+    <h4 class="page-title"><i class="bi bi-key"></i>Шкафчики</h4>
+
+    <!-- Итого -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="icon-wrap green"><i class="bi bi-unlock-fill"></i></div>
+                <div>
+                    <div class="stat-label">Свободно</div>
+                    <div class="stat-value" th:text="${freeCount}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="icon-wrap orange"><i class="bi bi-lock-fill"></i></div>
+                <div>
+                    <div class="stat-label">Занято</div>
+                    <div class="stat-value" th:text="${occupiedCount}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="icon-wrap blue"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+                <div>
+                    <div class="stat-label">Всего</div>
+                    <div class="stat-value" th:text="${freeCount + occupiedCount}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сетка шкафчиков -->
+    <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-grid-3x3-gap-fill me-2"></i>Карта шкафчиков</div>
+        <div class="card-body">
+            <div class="locker-grid">
+                <div th:each="locker : ${lockers}"
+                     th:classappend="${locker.status.name() == 'FREE'} ? 'free' : 'occupied'"
+                     class="locker-cell">
+                    <i th:classappend="${locker.status.name() == 'FREE'} ? 'bi-unlock-fill' : 'bi-lock-fill'"
+                       class="bi"></i>
+                    <span>№<span th:text="${locker.lockerNumber}"></span></span>
+                    <span th:text="${locker.status.name() == 'FREE'} ? 'Свободен' : 'Занят'"></span>
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex gap-4" style="font-size: .8rem; color: var(--text-muted);">
+                <span><i class="bi bi-unlock-fill text-success me-1"></i>Свободен</span>
+                <span><i class="bi bi-lock-fill text-warning me-1"></i>Занят</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Вход / Выход', ~{::body-content})}">
+<body>
+<div th:fragment="body-content">
+
+    <h4 class="page-title"><i class="bi bi-door-open"></i>Вход / Выход</h4>
+
+    <div class="row g-4">
+
+        <!-- Левая колонка: поиск и регистрация входа -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-search me-2"></i>Найти клиента
+                </div>
+                <div class="card-body">
+                    <form class="mb-3" method="get" action="/visits">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="q"
+                                   th:value="${param.q}"
+                                   placeholder="Фамилия, имя или телефон..." autofocus/>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            <a th:if="${param.q}" href="/visits" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </div>
+                    </form>
+
+                    <!-- Нет запроса -->
+                    <div th:if="${clients == null}" class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <p>Введите имя или номер телефона клиента</p>
+                    </div>
+
+                    <!-- Нет результатов -->
+                    <div th:if="${clients != null and #lists.isEmpty(clients)}" class="empty-state">
+                        <i class="bi bi-person-x"></i>
+                        <p>Клиент не найден</p>
+                    </div>
+
+                    <!-- Список клиентов -->
+                    <div th:if="${clients != null and not #lists.isEmpty(clients)}">
+                        <div th:each="client : ${clients}" class="client-result-card">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div>
+                                    <div class="client-name">
+                                        <span th:text="${client.fullName}"></span>
+                                        <span th:if="${client.gender != null}" class="badge ms-1"
+                                              th:classappend="${client.gender.name() == 'MALE'} ? 'bg-primary' : 'bg-danger'">
+                                            <i th:class="${client.gender.name() == 'MALE'} ? 'bi bi-gender-male' : 'bi bi-gender-female'"></i>
+                                        </span>
+                                    </div>
+                                    <div class="client-phone" th:text="${client.phone}"></div>
+                                </div>
+                            </div>
+                            <form th:action="@{/visits/checkin/{id}(id=${client.id})}" method="post" class="mt-2">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <select name="lockerId" class="form-select form-select-sm" required
+                                            style="max-width: 180px;">
+                                        <option value="">Выберите шкафчик</option>
+                                        <th:block th:if="${clientLockers != null and clientLockers.get(client.id) != null}">
+                                            <option th:each="locker : ${clientLockers.get(client.id)}"
+                                                    th:value="${locker.id}"
+                                                    th:text="'№' + ${locker.lockerNumber}"></option>
+                                        </th:block>
+                                    </select>
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>Вход
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Правая колонка: сейчас в зале -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-people-fill me-2"></i>Сейчас в зале</span>
+                    <span class="badge bg-success rounded-pill"
+                          th:text="${#lists.size(currentVisits)}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(currentVisits)}" class="empty-state">
+                        <i class="bi bi-emoji-smile"></i>
+                        <p>В зале пока никого нет</p>
+                    </div>
+                    <table th:unless="${#lists.isEmpty(currentVisits)}" class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Клиент</th>
+                                <th>Шкафчик</th>
+                                <th>Вход</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="visit : ${currentVisits}">
+                                <td>
+                                    <a th:href="@{/clients/{id}(id=${visit.client.id})}"
+                                       class="fw-semibold text-decoration-none"
+                                       th:text="${visit.client.fullName}"></a>
+                                    <div class="text-muted small" th:text="${visit.client.phone}"></div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        №<span th:text="${visit.locker.lockerNumber}"></span>
+                                    </span>
+                                </td>
+                                <td class="text-muted"
+                                    th:text="${#temporals.format(visit.checkIn, 'HH:mm')}"></td>
+                                <td class="text-end">
+                                    <form th:action="@{/visits/checkout/{id}(id=${visit.client.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-box-arrow-right me-1"></i>Выход
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

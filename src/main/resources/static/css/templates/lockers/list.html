@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Шкафчики', ~{::body-content})}">
+<body>
+<div th:fragment="body-content">
+
+    <h4 class="page-title"><i class="bi bi-key"></i>Шкафчики</h4>
+
+    <!-- Статистика -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="icon-wrap blue"><i class="bi bi-gender-male"></i></div>
+                <div>
+                    <div class="stat-label">Муж. свободно</div>
+                    <div class="stat-value" th:text="${maleFreeCount}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="icon-wrap orange"><i class="bi bi-gender-male"></i></div>
+                <div>
+                    <div class="stat-label">Муж. занято</div>
+                    <div class="stat-value" th:text="${maleOccupiedCount}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="icon-wrap red"><i class="bi bi-gender-female"></i></div>
+                <div>
+                    <div class="stat-label">Жен. свободно</div>
+                    <div class="stat-value" th:text="${femaleFreeCount}">0</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="icon-wrap orange"><i class="bi bi-gender-female"></i></div>
+                <div>
+                    <div class="stat-label">Жен. занято</div>
+                    <div class="stat-value" th:text="${femaleOccupiedCount}">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Мужские шкафчики -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-gender-male me-2"></i>Мужские шкафчики (1–50)
+                </div>
+                <div class="card-body">
+                    <div class="locker-grid">
+                        <div th:each="locker : ${maleLockers}"
+                             th:classappend="${locker.status.name() == 'FREE'} ? 'free' : 'occupied'"
+                             class="locker-cell">
+                            <i th:class="${locker.status.name() == 'FREE'} ? 'bi bi-unlock-fill' : 'bi bi-lock-fill'"></i>
+                            <span class="locker-num" th:text="${locker.lockerNumber}"></span>
+                            <span class="locker-status"
+                                  th:text="${locker.status.name() == 'FREE'} ? 'Свободен' : 'Занят'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Женские шкафчики -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-gender-female me-2"></i>Женские шкафчики (51–100)
+                </div>
+                <div class="card-body">
+                    <div class="locker-grid">
+                        <div th:each="locker : ${femaleLockers}"
+                             th:classappend="${locker.status.name() == 'FREE'} ? 'free' : 'occupied'"
+                             class="locker-cell">
+                            <i th:class="${locker.status.name() == 'FREE'} ? 'bi bi-unlock-fill' : 'bi bi-lock-fill'"></i>
+                            <span class="locker-num" th:text="${locker.lockerNumber}"></span>
+                            <span class="locker-status"
+                                  th:text="${locker.status.name() == 'FREE'} ? 'Свободна' : 'Занята'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Легенда -->
+    <div class="mt-3 d-flex gap-4" style="font-size: .85rem; color: var(--text-muted);">
+        <span><i class="bi bi-unlock-fill text-success me-1"></i>Свободен</span>
+        <span><i class="bi bi-lock-fill text-warning me-1"></i>Занят</span>
+    </div>
+
+</div>
+</body>
+</html>

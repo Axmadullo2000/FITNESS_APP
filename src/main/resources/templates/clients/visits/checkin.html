@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: page('Вход / Выход', ~{::body-content})}">
+<body>
+<div th:fragment="body-content">
+
+    <h4 class="page-title"><i class="bi bi-door-open"></i>Вход / Выход</h4>
+
+    <div class="row g-4">
+
+        <!-- Поиск клиента для check-in -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-search me-2"></i>Найти клиента
+                </div>
+                <div class="card-body">
+                    <form method="get" action="/visits" class="mb-3">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="q"
+                                   th:value="${q}"
+                                   placeholder="Фамилия, имя или телефон..." autofocus/>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Результаты поиска -->
+                    <div th:if="${searchResults != null}">
+                        <div th:if="${#lists.isEmpty(searchResults)}" class="empty-state">
+                            <i class="bi bi-person-x"></i>
+                            <p>Клиент не найден</p>
+                        </div>
+                        <div th:unless="${#lists.isEmpty(searchResults)}">
+                            <div th:each="client : ${searchResults}" class="client-result-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="client-name" th:text="${client.fullName}"></div>
+                                        <div class="client-phone" th:text="${client.phone}"></div>
+                                    </div>
+                                    <div class="d-flex gap-1">
+                                        <form th:action="@{/visits/checkin/{id}(id=${client.id})}" method="post">
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="bi bi-box-arrow-in-right"></i> Вход
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/visits/checkout/{id}(id=${client.id})}" method="post">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-box-arrow-right"></i> Выход
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:if="${searchResults == null}" class="empty-state">
+                        <i class="bi bi-search"></i>
+                        <p>Введите имя, фамилию или номер телефона клиента</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Кто сейчас в зале -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-people-fill me-2"></i>Сейчас в зале</span>
+                    <span class="badge bg-success rounded-pill"
+                          th:text="${#lists.size(currentVisits)}">0</span>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(currentVisits)}" class="empty-state">
+                        <i class="bi bi-emoji-smile"></i>
+                        <p>В зале пока никого нет</p>
+                    </div>
+                    <table th:unless="${#lists.isEmpty(currentVisits)}" class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Клиент</th>
+                                <th>Шкафчик</th>
+                                <th>С</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="visit : ${currentVisits}">
+                                <td>
+                                    <div class="fw-semibold" th:text="${visit.client.fullName}"></div>
+                                    <div class="text-muted small" th:text="${visit.client.phone}"></div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        №<span th:text="${visit.locker.lockerNumber}"></span>
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(visit.checkIn, 'HH:mm')}"></td>
+                                <td>
+                                    <form th:action="@{/visits/checkout/{id}(id=${visit.client.id})}" method="post">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-box-arrow-right me-1"></i>Выход
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>
