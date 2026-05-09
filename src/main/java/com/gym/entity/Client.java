@@ -42,7 +42,7 @@ public class Client {
     private Gender gender;
 
     @Builder.Default
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String token = UUID.randomUUID().toString();
 
     @Builder.Default
