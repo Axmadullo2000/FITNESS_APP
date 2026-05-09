@@ -142,7 +142,7 @@
         scanning = true;
     });
 
-    // ── Step 2b: Show locker selection panel ──────────────────────────────
+    // ── Step 2b: Show locker selection panel ──────────────────
     function showLockerSelection(data) {
         const name = data.name || '';
         const parts = name.trim().split(' ');
@@ -152,7 +152,7 @@
         const grid = document.getElementById('locker-grid');
         grid.innerHTML = '';
         if (!data.lockers || data.lockers.length === 0) {
-            grid.innerHTML = '<div style="color:#ef4444;font-size:.9rem;">Нет свободных шкафчиков</div>';
+            grid.innerHTML = '<div style="color:#ef4444;font-size:.9rem;">— Нет свободных шкафчиков</div>';
         } else {
             data.lockers.forEach(locker => {
                 const cell = document.createElement('div');

@@ -48,39 +48,21 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initTariffs() {
-        if (tariffRepository.count() == 0) {
-            log.info("Initializing tariffs...");
+        log.info("Syncing tariffs...");
+        upsertTariff(TariffType.EVERY_DAY_WITH_TRAINER,    new BigDecimal("1500000"), 24, true);
+        upsertTariff(TariffType.EVERY_DAY_NO_TRAINER,      new BigDecimal("800000"),  24, false);
+        upsertTariff(TariffType.EVEY_OTHER_DAY_WITH_TRAINER, new BigDecimal("1000000"), 12, true);
+        upsertTariff(TariffType.EVEY_OTHER_DAY_NO_TRAINER,   new BigDecimal("400000"),  12, false);
+        log.info("Tariffs synced");
+    }
 
-            tariffRepository.save(Tariff.builder()
-                    .type(TariffType.EVERY_DAY_WITH_TRAINER)
-                    .price(new BigDecimal("500000"))
-                    .totalSessions(24)
-                    .hasTrainer(true)
-                    .build());
-
-            tariffRepository.save(Tariff.builder()
-                    .type(TariffType.EVERY_DAY_NO_TRAINER)
-                    .price(new BigDecimal("350000"))
-                    .totalSessions(24)
-                    .hasTrainer(false)
-                    .build());
-
-            tariffRepository.save(Tariff.builder()
-                    .type(TariffType.EVEY_OTHER_DAY_WITH_TRAINER)
-                    .price(new BigDecimal("300000"))
-                    .totalSessions(12)
-                    .hasTrainer(true)
-                    .build());
-
-            tariffRepository.save(Tariff.builder()
-                    .type(TariffType.EVEY_OTHER_DAY_NO_TRAINER)
-                    .price(new BigDecimal("200000"))
-                    .totalSessions(12)
-                    .hasTrainer(false)
-                    .build());
-
-            log.info("Tariffs initialized: 4 tariffs created");
-        }
+    private void upsertTariff(TariffType type, BigDecimal price, int sessions, boolean hasTrainer) {
+        Tariff tariff = tariffRepository.findByType(type).orElseGet(() ->
+                Tariff.builder().type(type).build());
+        tariff.setPrice(price);
+        tariff.setTotalSessions(sessions);
+        tariff.setHasTrainer(hasTrainer);
+        tariffRepository.save(tariff);
     }
 
     private void initLockers() {

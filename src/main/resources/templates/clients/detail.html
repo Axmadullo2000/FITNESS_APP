@@ -12,8 +12,8 @@
                 <p class="page-subtitle">Профиль клиента</p>
             </div>
         </div>
-        <a th:href="@{/clients/{id}/qr(id=${client.id})}" target="_blank" class="btn btn--ghost btn--sm">
-            <i class="bi bi-qr-code"></i> QR-код
+        <a th:href="@{/my/{token}(token=${client.token})}" target="_blank" class="btn btn--ghost btn--sm">
+            <i class="bi bi-qr-code"></i> Карточка клиента
         </a>
     </div>
 
@@ -64,7 +64,8 @@
                     <i class="bi bi-activity"></i> GymApp
                 </div>
                 <div class="membership-card-visual__name" th:text="${client.fullName}"></div>
-                <div class="membership-card-visual__sub">Абонемент активен</div>
+                <div class="membership-card-visual__sub"
+                     th:text="${activeCard.membership.tariff.displayName}">Абонемент</div>
 
                 <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1rem;">
                     <th:block th:each="i : ${#numbers.sequence(1, activeCard.totalSessions)}">
@@ -93,6 +94,11 @@
                         <div class="membership-card-visual__lbl">Статус</div>
                         <div class="membership-card-visual__val"
                              th:text="${activeCard.status.name() == 'IN_USE'} ? 'В зале' : 'Активен'"></div>
+                    </div>
+                    <div style="grid-column:1/-1;">
+                        <div class="membership-card-visual__lbl">Действует до</div>
+                        <div class="membership-card-visual__val"
+                             th:text="${#temporals.format(activeCard.expiresAt, 'dd MMMM yyyy')}"></div>
                     </div>
                 </div>
             </div>
@@ -150,7 +156,8 @@
                             <th>Тариф</th>
                             <th>Сеансов</th>
                             <th>Статус</th>
-                            <th>Дата</th>
+                            <th>Дата оформления</th>
+                            <th>Действует до</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -164,6 +171,9 @@
                             </td>
                             <td style="color:var(--text-muted);"
                                 th:text="${#temporals.format(m.createdAt, 'dd.MM.yyyy')}"></td>
+                            <td th:if="${m.card != null}" style="font-weight:600;"
+                                th:text="${#temporals.format(m.card.expiresAt, 'dd.MM.yyyy')}"></td>
+                            <td th:unless="${m.card != null}" style="color:var(--text-muted);">—</td>
                         </tr>
                         </tbody>
                     </table>

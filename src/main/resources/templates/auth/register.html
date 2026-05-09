@@ -11,124 +11,108 @@
 </head>
 <body>
 
-    <div class="auth-split">
-
-        <!-- Left hero -->
-        <div class="auth-hero">
-            <div class="auth-hero__logo">
-                <div class="auth-hero__logo-icon"><i class="bi bi-activity"></i></div>
-                <span class="auth-hero__logo-name">GymApp</span>
-            </div>
-            <div class="auth-hero__tagline">Начни своё фитнес-путешествие сегодня</div>
-            <div class="auth-hero__sub">
-                Зарегистрируйтесь и получите цифровой абонемент,
-                QR-карту для входа и личный кабинет.
-            </div>
-            <div class="auth-hero__stats">
-                <div class="auth-hero__stat">
-                    <div class="auth-hero__stat-val">QR</div>
-                    <div class="auth-hero__stat-label">Вход</div>
-                </div>
-                <div class="auth-hero__stat">
-                    <div class="auth-hero__stat-val">∞</div>
-                    <div class="auth-hero__stat-label">Тренировок</div>
-                </div>
-                <div class="auth-hero__stat">
-                    <div class="auth-hero__stat-val">1</div>
-                    <div class="auth-hero__stat-label">Приложение</div>
-                </div>
-            </div>
+<div class="auth-split">
+    <!-- Hero panel -->
+    <div class="auth-hero">
+        <div class="auth-hero__logo">
+            <i class="bi bi-activity"></i>
         </div>
-
-        <!-- Right form -->
-        <div class="auth-form-panel">
-            <div class="auth-form-wrap">
-                <h1 class="auth-title">Регистрация</h1>
-                <p class="auth-subtitle">Создайте аккаунт клиента зала</p>
-
-                <div th:if="${error}" class="auth-alert auth-alert--error">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <span th:text="${error}"></span>
-                </div>
-                <div th:if="${success}" class="auth-alert auth-alert--success">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span th:text="${success}"></span>
-                </div>
-
-                <form th:action="@{/register}" method="post">
-                    <div class="auth-form-row" style="margin-bottom:1rem;">
-                        <div class="auth-field" style="margin-bottom:0;">
-                            <label class="auth-label">Имя</label>
-                            <input type="text" name="firstName" class="auth-input"
-                                   placeholder="Ваше имя" required/>
-                        </div>
-                        <div class="auth-field" style="margin-bottom:0;">
-                            <label class="auth-label">Фамилия</label>
-                            <input type="text" name="lastName" class="auth-input"
-                                   placeholder="Ваша фамилия" required/>
-                        </div>
-                    </div>
-                    <div class="auth-field">
-                        <label class="auth-label">Телефон</label>
-                        <input type="tel"
-                               name="phone"
-                               class="auth-input"
-                               id="phoneInput"
-                               placeholder="+998 XX XXX XX XX"
-                               pattern="\+998[0-9]{9}"
-                               maxlength="13"
-                               required/>
-                        <span class="auth-field-hint" id="phoneHint" style="font-size:0.75rem; color:#8a8a9a; margin-top:4px; display:block;">Формат: +998901234567</span>
-                    </div>
-                    <div class="auth-field">
-                        <label class="auth-label">Пароль</label>
-                        <input type="password" name="password" class="auth-input"
-                               placeholder="Минимум 6 символов" minlength="6" required/>
-                    </div>
-                    <div class="auth-field">
-                        <label class="auth-label">Пол</label>
-                        <div class="gender-toggle">
-                            <label class="gender-option">
-                                <input type="radio" name="gender" value="MALE" required/>
-                                <i class="bi bi-gender-male"></i> Мужской
-                            </label>
-                            <label class="gender-option">
-                                <input type="radio" name="gender" value="FEMALE"/>
-                                <i class="bi bi-gender-female"></i> Женский
-                            </label>
-                        </div>
-                    </div>
-                    <button type="submit" class="auth-btn">
-                        <i class="bi bi-person-check-fill"></i> Создать аккаунт
-                    </button>
-                </form>
-
-                <div class="auth-divider">или</div>
-
-                <div class="auth-link-row">
-                    Уже есть аккаунт? <a href="/login">Войти</a>
-                </div>
-            </div>
+        <h1 class="auth-hero__title">GymApp</h1>
+        <p class="auth-hero__sub">Присоединяйтесь к нам</p>
+        <div class="auth-hero__features">
+            <div class="auth-hero__feature"><i class="bi bi-qr-code"></i> Личная карточка с QR-кодом</div>
+            <div class="auth-hero__feature"><i class="bi bi-calendar-check"></i> История посещений</div>
+            <div class="auth-hero__feature"><i class="bi bi-shield-check"></i> Безопасный вход</div>
         </div>
-
     </div>
 
-    <script>
-        const phone = document.getElementById('phoneInput');
-        phone.addEventListener('input', function () {
-            let val = this.value.replace(/\D/g, '');
-            if (!val.startsWith('998')) val = '998' + val.replace(/^998/, '');
-            val = val.slice(0, 12);
-            this.value = '+' + val;
-        });
-        phone.addEventListener('keydown', function (e) {
-            if (e.key === 'Backspace' && this.value === '+998') {
-                e.preventDefault();
-            }
-        });
-        phone.addEventListener('focus', function () {
-            if (!this.value) this.value = '+998';
-        });
-    </script>
+    <!-- Form panel -->
+    <div class="auth-form-panel">
+        <div class="auth-form-wrap">
+            <div class="auth-form-header">
+                <h2 class="auth-form-title">Создать аккаунт</h2>
+                <p class="auth-form-sub">Заполните данные для регистрации</p>
+            </div>
+
+            <div th:if="${error}" class="auth-alert auth-alert--error">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span th:text="${error}">Ошибка</span>
+            </div>
+
+            <form th:action="@{/register}" method="post">
+                <div class="auth-field-row">
+                    <div class="auth-field">
+                        <label class="auth-label">Имя</label>
+                        <div class="auth-input-wrap">
+                            <i class="bi bi-person auth-input-icon"></i>
+                            <input type="text" name="firstName" class="auth-input"
+                                   placeholder="Ваше имя" required="required"/>
+                        </div>
+                    </div>
+                    <div class="auth-field">
+                        <label class="auth-label">Фамилия</label>
+                        <div class="auth-input-wrap">
+                            <i class="bi bi-person auth-input-icon"></i>
+                            <input type="text" name="lastName" class="auth-input"
+                                   placeholder="Ваша фамилия" required="required"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label class="auth-label">Номер телефона</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-telephone auth-input-icon"></i>
+                        <input type="text" name="phone" class="auth-input"
+                               placeholder="+998 90 000 00 00" required="required"/>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label class="auth-label">Пол</label>
+                    <div class="gender-toggle">
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="MALE" required="required"/>
+                            <i class="bi bi-gender-male"></i> Мужской
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="FEMALE" required="required"/>
+                            <i class="bi bi-gender-female"></i> Женский
+                        </label>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label class="auth-label">Логин</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-at auth-input-icon"></i>
+                        <input type="text" name="username" class="auth-input"
+                               placeholder="Придумайте логин" required="required"/>
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label class="auth-label">Пароль</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-lock auth-input-icon"></i>
+                        <input type="password" name="password" class="auth-input"
+                               placeholder="Придумайте пароль" required="required"/>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn">
+                    <i class="bi bi-person-check-fill"></i> Зарегистрироваться
+                </button>
+            </form>
+
+            <div class="auth-divider">уже есть аккаунт?</div>
+
+            <a th:href="@{/login}" class="auth-link-btn">
+                <i class="bi bi-box-arrow-in-right"></i> Войти в систему
+            </a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
