@@ -12,13 +12,15 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-@Table(name = "lockers")
+@Table(name = "lockers", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"locker_number", "gender"})
+})
 public class Locker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private Integer lockerNumber;
 
     @Enumerated(EnumType.STRING)
