@@ -37,7 +37,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initAdmin() {
-        if (!appUserRepository.existsByUsername("admin")) {
+        if (!appUserRepository.existsByUsername("+998998266611")) {
             appUserRepository.save(AppUser.builder()
                     .username("admin")
                     .password(passwordEncoder.encode("admin123"))
