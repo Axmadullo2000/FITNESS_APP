@@ -2,6 +2,7 @@ package com.gym.config;
 
 import com.gym.entity.AppUser;
 import com.gym.repository.AppUserRepository;
+import com.gym.util.PhoneUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -20,8 +21,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = appUserRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+        // Normalize phone before lookup so "+998 90 123" and "998901234567" both work
+        String normalized = PhoneUtils.normalize(username);
+        AppUser user = appUserRepository.findByUsername(normalized)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + normalized));
 
         return new User(
                 user.getUsername(),

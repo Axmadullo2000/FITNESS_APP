@@ -3,6 +3,7 @@ package com.gym.service.impl;
 import com.gym.entity.Client;
 import com.gym.repository.ClientRepository;
 import com.gym.service.ClientService;
+import com.gym.util.PhoneUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,11 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public void save(Client client) {
-        if (client.getId() == null && clientRepository.existsByPhone(client.getPhone())) {
+        // Normalize phone before any check or save
+        String normalizedPhone = PhoneUtils.normalize(client.getPhone());
+        client.setPhone(normalizedPhone);
+
+        if (client.getId() == null && clientRepository.existsByPhone(normalizedPhone)) {
             throw new RuntimeException("Клиент с таким номером телефона уже существует");
         }
         clientRepository.save(client);
@@ -47,12 +52,12 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client findClientByPhone(String phone) {
-        return clientRepository.findByPhone(phone)
+        return clientRepository.findByPhone(PhoneUtils.normalize(phone))
                 .orElseThrow(() -> new RuntimeException("Клиент не найден"));
     }
 
     @Override
     public boolean existsByPhone(String phone) {
-        return clientRepository.existsByPhone(phone);
+        return clientRepository.existsByPhone(PhoneUtils.normalize(phone));
     }
 }

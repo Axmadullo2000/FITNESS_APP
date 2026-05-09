@@ -16,7 +16,7 @@
 
     <div class="card" style="max-width:520px;">
         <div class="card-body">
-            <form th:action="@{/clients/new}" method="post" th:object="${client}">
+            <form th:action="@{/clients/new}" method="post" th:object="${client}" id="clientForm">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
                     <div class="form-group" style="margin-bottom:0;">
                         <label class="form-label">Имя *</label>
@@ -29,11 +29,17 @@
                                placeholder="Введите фамилию" required="required"/>
                     </div>
                 </div>
+
                 <div class="form-group">
-                    <label class="form-label">Телефон *</label>
-                    <input type="tel" class="form-control" th:field="*{phone}"
+                    <label class="form-label">Телефон *
+                        <span style="font-weight:400;color:var(--text-muted);text-transform:none;letter-spacing:0;">
+                            — начинается с +998
+                        </span>
+                    </label>
+                    <input type="tel" id="adminPhone" class="form-control" th:field="*{phone}"
                            placeholder="+998 90 123 45 67" required="required"/>
                 </div>
+
                 <div class="form-group">
                     <label class="form-label">Пол *</label>
                     <div style="display:flex;gap:1rem;">
@@ -51,6 +57,7 @@
                         </label>
                     </div>
                 </div>
+
                 <div style="display:flex;gap:.75rem;margin-top:1.5rem;">
                     <button type="submit" class="btn btn--primary btn--lg" style="flex:1;">
                         <i class="bi bi-person-plus-fill"></i> Зарегистрировать
@@ -62,5 +69,18 @@
     </div>
 
 </div>
+
+<script>
+    /* Normalize phone on blur: strip spaces, add +998 prefix */
+    document.getElementById('adminPhone').addEventListener('blur', function() {
+        var val = this.value.replace(/\s+/g, '');
+        if (!val.startsWith('+998')) {
+            if (val.startsWith('998') && val.length >= 11) val = '+' + val;
+            else if (/^\d{9}$/.test(val)) val = '+998' + val;
+        }
+        this.value = val;
+    });
+</script>
+
 </body>
 </html>

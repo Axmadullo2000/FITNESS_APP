@@ -6,6 +6,7 @@ import com.gym.entity.types.Gender;
 import com.gym.repository.AppUserRepository;
 import com.gym.repository.ClientRepository;
 import com.gym.service.AuthService;
+import com.gym.util.PhoneUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,19 +24,21 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void register(String firstName, String lastName, String phone,
                          String password, Gender gender) {
-        if (appUserRepository.existsByUsername(phone)) {
+        String normalizedPhone = PhoneUtils.normalize(phone);
+
+        if (appUserRepository.existsByUsername(normalizedPhone)) {
             throw new RuntimeException("Этот номер телефона уже зарегистрирован");
         }
 
         Client client = clientRepository.save(Client.builder()
-                .firstName(firstName)
-                .lastName(lastName)
-                .phone(phone)
+                .firstName(firstName.trim())
+                .lastName(lastName.trim())
+                .phone(normalizedPhone)
                 .gender(gender)
                 .build());
 
         appUserRepository.save(AppUser.builder()
-                .username(phone)
+                .username(normalizedPhone)
                 .password(passwordEncoder.encode(password))
                 .role("ROLE_CLIENT")
                 .client(client)
