@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Вход в зал — GymApp</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" href="/css/scanner.css"/>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+
+<div class="scanner-logo"><i class="bi bi-activity"></i> GymApp — Вход в зал</div>
+
+<!-- Camera reader -->
+<div class="scanner-box">
+    <div class="corner corner--tl"></div>
+    <div class="corner corner--tr"></div>
+    <div class="corner corner--bl"></div>
+    <div class="corner corner--br"></div>
+    <div id="reader"></div>
+</div>
+
+<div class="scanner-hint">
+    <i class="bi bi-qr-code-scan"></i>
+    Наведите камеру на QR-код клиента
+</div>
+
+<!-- ── Step 1: Locker selection overlay ───────────────────────────────────── -->
+<div id="locker-overlay" class="locker-overlay">
+
+    <div class="locker-overlay__client">
+        <div class="locker-overlay__avatar" id="client-initials">АБ</div>
+        <div class="locker-overlay__name"   id="client-name">Имя Фамилия</div>
+        <div class="locker-overlay__sub">Выберите шкафчик</div>
+    </div>
+
+    <div class="locker-overlay__label"><i class="bi bi-key"></i> Свободные шкафчики</div>
+
+    <div class="locker-grid" id="locker-grid">
+        <!-- filled by JS -->
+    </div>
+
+    <button class="locker-overlay__cancel" id="btn-cancel">
+        <i class="bi bi-x-circle"></i> Отмена
+    </button>
+</div>
+
+<!-- ── Step 2b: Checkout confirmation overlay ──────────────────────────────── -->
+<div id="checkout-overlay" class="checkout-overlay">
+    <div class="checkout-overlay__icon"><i class="bi bi-box-arrow-right"></i></div>
+    <div class="checkout-overlay__name"   id="checkout-name"></div>
+    <div class="checkout-overlay__locker" id="checkout-locker"></div>
+    <div class="checkout-overlay__sub">Клиент покидает зал</div>
+
+    <div class="checkout-overlay__actions">
+        <button class="btn-checkout-confirm" id="btn-checkout-confirm">
+            <i class="bi bi-check-lg"></i> Подтвердить выход
+        </button>
+        <button class="btn-checkout-cancel" id="btn-checkout-cancel">
+            <i class="bi bi-x-circle"></i> Отмена
+        </button>
+    </div>
+</div>
+
+<!-- ── Step 3: Result overlay ─────────────────────────────────────────────── -->
+<div id="result-overlay" class="result-overlay">
+    <div class="result-icon"      id="result-icon"></div>
+    <div class="result-name"      id="result-name"></div>
+    <div class="result-locker"    id="result-locker"></div>
+    <div class="result-message"   id="result-message"></div>
+    <div class="result-countdown" id="result-countdown"></div>
+</div>
+
+<script>
+    let scanning  = true;
+    let currentToken = null;
+
+    const html5QrCode = new Html5Qrcode("reader");
+
+    html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 260, height: 260 } },
+        onScanSuccess,
+        () => {}
+    );
+
+    // ── Step 1: QR scanned → fetch client + lockers ────────────────────────
+    function onScanSuccess(decodedText) {
+        if (!scanning) return;
+        scanning = false;
+
+        const match = decodedText.match(/\/my\/([a-f0-9\-]+)/);
+        if (!match) {
+            showResult(false, '—', null, 'Неверный QR-код');
+            return;
+        }
+
+        currentToken = match[1];
+
+        fetch('/scan/lookup/' + currentToken)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.found) {
+                    showResult(false, '—', null, data.message || 'Клиент не найден');
+                    return;
+                }
+                onScanData(data);
+            })
+            .catch(() => showResult(false, '—', null, 'Ошибка соединения'));
+    }
+
+    // ── Step 2: Route based on inGym flag ─────────────────────────────────
+    function onScanData(data) {
+        if (data.inGym) {
+            showCheckoutConfirmation(data.name, data.lockerNumber);
+        } else {
+            showLockerSelection(data);
+        }
+    }
+
+    // ── Step 2a: Checkout confirmation overlay ─────────────────────────────
+    function showCheckoutConfirmation(name, lockerNumber) {
+        document.getElementById('checkout-name').textContent   = name;
+        document.getElementById('checkout-locker').textContent = 'Шкафчик №' + lockerNumber;
+        document.getElementById('checkout-overlay').classList.add('show');
+    }
+
+    document.getElementById('btn-checkout-confirm').addEventListener('click', () => {
+        document.getElementById('checkout-overlay').classList.remove('show');
+
+        fetch('/scan/checkout/' + currentToken, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => showResult(data.success, data.name || '', data.lockerNumber || null, data.message))
+            .catch(() => showResult(false, '—', null, 'Ошибка соединения'));
+    });
+
+    document.getElementById('btn-checkout-cancel').addEventListener('click', () => {
+        document.getElementById('checkout-overlay').classList.remove('show');
+        currentToken = null;
+        scanning = true;
+    });
+
+    // ── Step 2b: Show locker selection panel ──────────────────────────────
+    function showLockerSelection(data) {
+        const name = data.name || '';
+        const parts = name.trim().split(' ');
+        const initials = parts.map(p => p[0] || '').join('').toUpperCase().slice(0, 2);
+        document.getElementById('client-initials').textContent = initials;
+        document.getElementById('client-name').textContent = name;
+        const grid = document.getElementById('locker-grid');
+        grid.innerHTML = '';
+        if (!data.lockers || data.lockers.length === 0) {
+            grid.innerHTML = '<div style="color:#ef4444;font-size:.9rem;">Нет свободных шкафчиков</div>';
+        } else {
+            data.lockers.forEach(locker => {
+                const cell = document.createElement('div');
+                cell.className = 'locker-cell';
+                cell.innerHTML =
+                    '<span class="locker-cell__icon"><i class="bi bi-lock-fill"></i></span>' +
+                    '<span class="locker-cell__number">№' + locker.number + '</span>';
+                cell.addEventListener('click', () => confirmCheckin(locker.id, locker.number));
+                grid.appendChild(cell);
+            });
+        }
+        document.getElementById('locker-overlay').classList.add('show');
+    }
+
+    function confirmCheckin(lockerId, lockerNumber) {
+        document.getElementById('locker-overlay').classList.remove('show');
+        fetch('/scan/checkin/' + currentToken + '/' + lockerId, { method: 'POST' })
+            .then(r => r.json())
+            .then(data => showResult(data.success, data.name || '', lockerNumber, data.message))
+            .catch(() => showResult(false, '—', null, 'Ошибка соединения'));
+    }
+
+    document.getElementById('btn-cancel').addEventListener('click', () => {
+        document.getElementById('locker-overlay').classList.remove('show');
+        currentToken = null;
+        scanning = true;
+    });
+
+    function showResult(success, name, lockerNumber, message) {
+        document.getElementById('locker-overlay').classList.remove('show');
+        const overlay = document.getElementById('result-overlay');
+        overlay.className = 'result-overlay show result-overlay--' + (success ? 'success' : 'error');
+        document.getElementById('result-icon').textContent = success ? '✓' : '✗';
+        document.getElementById('result-name').textContent = name;
+        document.getElementById('result-message').textContent = message;
+        const lockerEl = document.getElementById('result-locker');
+        lockerEl.textContent = (success && lockerNumber) ? 'Шкафчик №' + lockerNumber : '';
+        let sec = 3;
+        const cd = document.getElementById('result-countdown');
+        cd.textContent = 'Продолжение через ' + sec + ' сек...';
+        const interval = setInterval(() => {
+            sec--;
+            cd.textContent = 'Продолжение через ' + sec + ' сек...';
+            if (sec <= 0) {
+                clearInterval(interval);
+                overlay.className = 'result-overlay';
+                currentToken = null;
+                scanning = true;
+            }
+        }, 1000);
+    }
+</script>
+</body>
+</html>

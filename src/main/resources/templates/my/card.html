@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <title th:text="${client.fullName} + ' — GymApp'">GymApp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/card.css}"/>
+</head>
+<body>
+
+<div class="gym-card">
+    <!-- Logo -->
+    <div class="card-logo">
+        <div class="card-logo__icon"><i class="bi bi-activity"></i></div>
+        <span class="card-logo__name">GymApp</span>
+    </div>
+
+    <!-- Avatar -->
+    <div class="card-avatar"
+         th:text="${#strings.substring(client.firstName,0,1) + #strings.substring(client.lastName,0,1)}">АБ</div>
+
+    <div class="card-name" th:text="${client.fullName}">Имя Фамилия</div>
+    <div class="card-phone" th:text="${client.phone}">+998 90 000 00 00</div>
+
+    <!-- Status -->
+    <div class="card-status">
+        <div th:if="${card != null}">
+            <span th:if="${card.remainingSessions > 0}" class="status-badge status-badge--active">
+                <i class="bi bi-check-circle-fill"></i> Абонемент активен
+            </span>
+            <span th:unless="${card.remainingSessions > 0}" class="status-badge status-badge--expired">
+                <i class="bi bi-x-circle-fill"></i> Абонемент истёк
+            </span>
+        </div>
+        <div th:if="${card == null}">
+            <span class="status-badge status-badge--none">
+                <i class="bi bi-dash-circle"></i> Нет абонемента
+            </span>
+        </div>
+    </div>
+
+    <!-- QR code -->
+    <div class="card-qr">
+        <img th:src="@{/clients/{id}/qr(id=${client.id})}" alt="QR Code"/>
+    </div>
+
+    <!-- Sessions info -->
+    <div th:if="${card != null}" class="card-info-row">
+        <div class="card-info-item">
+            <div class="card-info-item__label">Осталось занятий</div>
+            <div class="card-info-item__val"
+                 th:text="${card.remainingSessions} + ' / ' + ${card.totalSessions}"></div>
+        </div>
+        <div class="card-info-item">
+            <div class="card-info-item__label">Действует до</div>
+            <div class="card-info-item__val"
+                 th:text="${#temporals.format(card.expiresAt, 'dd.MM.yyyy')}"></div>
+        </div>
+    </div>
+
+    <div class="card-hint">
+        <i class="bi bi-qr-code-scan"></i>
+        Покажите QR-код на входе в зал
+    </div>
+</div>
+
+</body>
+</html>

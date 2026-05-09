@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: #0A0B14;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: #F9FAFB;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Topbar ─────────────────────────────────────────────── */
+.topbar {
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.25rem;
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+}
+
+.topbar__brand {
+    font-size: 1.05rem; font-weight: 900;
+    color: #F97316;
+    display: flex; align-items: center; gap: .5rem;
+    letter-spacing: -.2px;
+}
+
+.topbar__brand i { font-size: 1.15rem; }
+
+.topbar__logout {
+    display: flex; align-items: center; gap: .4rem;
+    padding: .35rem .875rem;
+    border-radius: 20px;
+    border: 1px solid rgba(239,68,68,.3);
+    background: rgba(239,68,68,.08);
+    color: #F87171;
+    font-size: .78rem; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all .2s;
+}
+.topbar__logout:hover { background: rgba(239,68,68,.18); color: #FCA5A5; }
+
+/* ── Container ──────────────────────────────────────────── */
+.cab-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+}
+
+/* ── Profile hero ───────────────────────────────────────── */
+.profile-hero {
+    background: linear-gradient(145deg, #111827 0%, #1C1F35 100%);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+}
+
+.profile-hero::before {
+    content: '';
+    position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(249,115,22,.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.profile-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #F97316, #FB923C);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem; font-weight: 800; color: #fff;
+    margin: 0 auto 1rem;
+    box-shadow: 0 8px 24px rgba(249,115,22,.35);
+    position: relative; z-index: 1;
+}
+
+.profile-name {
+    font-size: 1.3rem; font-weight: 800;
+    color: #F9FAFB; letter-spacing: -.3px;
+    margin-bottom: .3rem;
+    position: relative; z-index: 1;
+}
+
+.profile-phone {
+    font-size: .85rem; color: rgba(255,255,255,.4);
+    margin-bottom: 1rem;
+    position: relative; z-index: 1;
+}
+
+/* Status pill */
+.status-pill {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .35rem 1rem;
+    border-radius: 20px;
+    font-size: .78rem; font-weight: 700;
+    position: relative; z-index: 1;
+}
+
+.status-pill--active {
+    background: rgba(34,197,94,.15);
+    color: #4ADE80;
+    border: 1px solid rgba(34,197,94,.3);
+}
+
+.status-pill--active i { font-size: .45rem; animation: pulse-dot 1.5s infinite; }
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; } 50% { opacity: .3; }
+}
+
+.status-pill--inactive {
+    background: rgba(239,68,68,.1);
+    color: #F87171;
+    border: 1px solid rgba(239,68,68,.25);
+}
+
+/* ── Membership card visual ─────────────────────────────── */
+.membership-card {
+    background: linear-gradient(135deg, #111827 0%, #1C1F35 60%, #0D1429 100%);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+}
+
+.membership-card::before {
+    content: '';
+    position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(249,115,22,.18) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.mc-logo {
+    font-size: .75rem; font-weight: 800; color: #F97316;
+    display: flex; align-items: center; gap: .3rem;
+    margin-bottom: 1.25rem;
+    position: relative; z-index: 1;
+    text-transform: uppercase; letter-spacing: .08em;
+}
+
+.mc-name {
+    font-size: 1rem; font-weight: 700;
+    margin-bottom: .2rem;
+    position: relative; z-index: 1;
+}
+
+.mc-sub {
+    font-size: .73rem; color: rgba(255,255,255,.4);
+    margin-bottom: 1.25rem;
+    position: relative; z-index: 1;
+}
+
+/* Session progress dots */
+.mc-dots {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-bottom: .875rem;
+    position: relative; z-index: 1;
+}
+
+.mc-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+}
+.mc-dot--used { background: rgba(239,68,68,.6); }
+.mc-dot--left { background: #22C55E; }
+
+/* Progress bar */
+.mc-progress-track {
+    background: rgba(255,255,255,.08);
+    border-radius: 99px; overflow: hidden; height: 6px;
+    margin-bottom: 1rem;
+    position: relative; z-index: 1;
+}
+.mc-progress-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, #22C55E, #4ADE80);
+    transition: width .5s ease;
+}
+.mc-progress-fill--warn { background: linear-gradient(90deg, #F97316, #FB923C); }
+
+/* Stats row */
+.mc-stats {
+    display: flex; gap: 2rem;
+    border-top: 1px solid rgba(255,255,255,.07);
+    padding-top: .875rem;
+    position: relative; z-index: 1;
+}
+.mc-stat-label {
+    font-size: .62rem; text-transform: uppercase; letter-spacing: .07em;
+    color: rgba(255,255,255,.35); margin-bottom: .2rem;
+}
+.mc-stat-val { font-size: 1.05rem; font-weight: 800; }
+
+/* ── QR section ─────────────────────────────────────────── */
+.qr-card {
+    background: linear-gradient(145deg, #111827, #1C1F35);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 20px;
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+.qr-label {
+    font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: rgba(255,255,255,.3);
+    margin-bottom: 1.25rem;
+}
+
+.qr-image-wrap {
+    display: inline-block;
+    background: #fff;
+    border-radius: 16px;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+
+.qr-image-wrap img {
+    display: block;
+    width: 180px; height: 180px;
+    border-radius: 4px;
+}
+
+.qr-hint {
+    font-size: .82rem; color: rgba(255,255,255,.3);
+    display: flex; align-items: center;
+    justify-content: center; gap: .4rem;
+}
+
+/* ── No card state ──────────────────────────────────────── */
+.no-card {
+    background: rgba(239,68,68,.07);
+    border: 1px solid rgba(239,68,68,.2);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: #F87171;
+}
+.no-card i { font-size: 2rem; margin-bottom: .75rem; display: block; opacity: .6; }
+.no-card p { font-size: .85rem; line-height: 1.6; color: rgba(255,255,255,.4); }
