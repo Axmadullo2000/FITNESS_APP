@@ -4,6 +4,12 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <title th:text="${client.fullName} + ' — GymApp'">GymApp</title>
+    <script>
+        (function(){
+            var t = localStorage.getItem('gymapp-theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
@@ -11,61 +17,106 @@
 </head>
 <body>
 
+<!-- Theme toggle -->
+<button class="btn-theme-card" id="themeToggle" aria-label="Тема">
+    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+</button>
+
 <div class="gym-card">
-    <!-- Logo -->
-    <div class="card-logo">
-        <div class="card-logo__icon"><i class="bi bi-activity"></i></div>
-        <span class="card-logo__name">GymApp</span>
+
+    <!-- Header gradient band -->
+    <div class="gym-card__header">
+        <div class="gym-card__brand">
+            <div class="gym-card__brand-icon"><i class="bi bi-activity"></i></div>
+            GymApp
+        </div>
+        <div class="gym-card__name" th:text="${client.fullName}">Имя Фамилия</div>
+        <div class="gym-card__phone" th:text="${client.phone}">+998 90 000 00 00</div>
     </div>
 
-    <!-- Avatar -->
-    <div class="card-avatar"
-         th:text="${#strings.substring(client.firstName,0,1) + #strings.substring(client.lastName,0,1)}">АБ</div>
+    <!-- Body -->
+    <div class="gym-card__body">
 
-    <div class="card-name" th:text="${client.fullName}">Имя Фамилия</div>
-    <div class="card-phone" th:text="${client.phone}">+998 90 000 00 00</div>
-
-    <!-- Status -->
-    <div class="card-status">
-        <div th:if="${card != null}">
-            <span th:if="${card.remainingSessions > 0}" class="status-badge status-badge--active">
-                <i class="bi bi-check-circle-fill"></i> Абонемент активен
-            </span>
-            <span th:unless="${card.remainingSessions > 0}" class="status-badge status-badge--expired">
-                <i class="bi bi-x-circle-fill"></i> Абонемент истёк
-            </span>
+        <!-- Status badge -->
+        <div style="margin-bottom:1.25rem;">
+            <div th:if="${card != null}">
+                <span th:if="${card.remainingSessions > 0}" class="gym-card__badge gym-card__badge--active">
+                    <i class="bi bi-check-lg"></i> Абонемент активен
+                </span>
+                <span th:unless="${card.remainingSessions > 0}" class="gym-card__badge gym-card__badge--expired">
+                    <i class="bi bi-x-lg"></i> Абонемент истёк
+                </span>
+            </div>
+            <div th:if="${card == null}">
+                <span class="gym-card__badge gym-card__badge--expired">
+                    <i class="bi bi-x-lg"></i> Нет абонемента
+                </span>
+            </div>
         </div>
-        <div th:if="${card == null}">
-            <span class="status-badge status-badge--none">
-                <i class="bi bi-dash-circle"></i> Нет абонемента
-            </span>
-        </div>
-    </div>
 
-    <!-- QR code -->
-    <div class="card-qr">
-        <img th:src="@{/clients/{id}/qr(id=${client.id})}" alt="QR Code"/>
-    </div>
-
-    <!-- Sessions info -->
-    <div th:if="${card != null}" class="card-info-row">
-        <div class="card-info-item">
-            <div class="card-info-item__label">Осталось занятий</div>
-            <div class="card-info-item__val"
-                 th:text="${card.remainingSessions} + ' / ' + ${card.totalSessions}"></div>
+        <!-- Session info rows -->
+        <div th:if="${card != null}" class="gym-card__rows">
+            <div class="gym-card__row">
+                <div class="gym-card__row-label">Осталось занятий</div>
+                <div class="gym-card__row-val"
+                     th:text="${card.remainingSessions} + ' / ' + ${card.totalSessions}">12 / 24</div>
+            </div>
+            <div class="gym-card__row">
+                <div class="gym-card__row-label">Статус</div>
+                <div class="gym-card__row-val"
+                     th:text="${card.status.name() == 'IN_USE'} ? 'В зале' : 'Активен'">Активен</div>
+            </div>
+            <div class="gym-card__row gym-card__row--full">
+                <div class="gym-card__row-label">Действует до</div>
+                <div class="gym-card__row-val"
+                     th:text="${#temporals.format(card.expiresAt, 'dd MMMM yyyy')}">01 янв 2025</div>
+                <div th:if="${card != null}" class="sessions-bar-wrap" style="margin-top:.625rem;">
+                    <div class="sessions-bar">
+                        <div class="sessions-bar__fill"
+                             th:style="'width:' + ${((card.totalSessions - card.remainingSessions) * 100) / card.totalSessions} + '%'">
+                        </div>
+                    </div>
+                    <div class="sessions-bar-label" style="margin-top:.3rem;">
+                        <span th:text="'Использовано: ' + ${card.totalSessions - card.remainingSessions}">0</span>
+                        <span th:text="'Из ' + ${card.totalSessions}">24</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-info-item">
-            <div class="card-info-item__label">Действует до</div>
-            <div class="card-info-item__val"
-                 th:text="${#temporals.format(card.expiresAt, 'dd.MM.yyyy')}"></div>
-        </div>
-    </div>
 
-    <div class="card-hint">
-        <i class="bi bi-qr-code-scan"></i>
-        Покажите QR-код на входе в зал
+        <!-- No card message -->
+        <div th:if="${card == null}" class="gym-card__no-membership">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p>Нет активного абонемента.<br/>Обратитесь к администратору зала.</p>
+        </div>
+
+        <!-- QR code -->
+        <div class="gym-card__qr">
+            <div class="gym-card__qr-label"><i class="bi bi-qr-code"></i> QR-код для входа</div>
+            <img th:src="@{/clients/{id}/qr(id=${client.id})}" alt="QR Code"/>
+            <div class="gym-card__qr-hint">
+                <i class="bi bi-qr-code-scan"></i>
+                Покажите QR-код на входе в зал
+            </div>
+        </div>
+
     </div>
 </div>
+
+<script>
+    /* Theme toggle */
+    var html = document.documentElement;
+    var icon = document.getElementById('themeIcon');
+    function applyTheme(t) {
+        html.setAttribute('data-theme', t);
+        localStorage.setItem('gymapp-theme', t);
+        if (icon) icon.className = t === 'light' ? 'bi bi-sun-fill' : 'bi bi-moon-stars-fill';
+    }
+    applyTheme(localStorage.getItem('gymapp-theme') || 'dark');
+    document.getElementById('themeToggle').addEventListener('click', function() {
+        applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+    });
+</script>
 
 </body>
 </html>

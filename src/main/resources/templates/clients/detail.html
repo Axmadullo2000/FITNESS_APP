@@ -150,6 +150,7 @@
                         <i class="bi bi-credit-card"></i>
                         <div class="empty-state__title">Нет абонементов</div>
                     </div>
+                    <div class="table-wrap">
                     <table th:unless="${#lists.isEmpty(memberships)}" class="data-table">
                         <thead>
                         <tr>
@@ -177,6 +178,7 @@
                         </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 
@@ -193,6 +195,7 @@
                         <i class="bi bi-calendar-x"></i>
                         <div class="empty-state__title">Нет посещений</div>
                     </div>
+                    <div class="table-wrap">
                     <table th:unless="${#lists.isEmpty(visits)}" class="data-table">
                         <thead>
                         <tr>
@@ -226,6 +229,7 @@
                         </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 

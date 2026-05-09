@@ -90,6 +90,7 @@
                     <div class="empty-state__title">Зал пуст</div>
                     <div style="font-size:.77rem;">Посетители появятся после регистрации</div>
                 </div>
+                <div class="table-wrap">
                 <table th:unless="${#lists.isEmpty(currentVisits)}" class="data-table">
                     <thead>
                     <tr>
@@ -131,6 +132,7 @@
                     </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 

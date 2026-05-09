@@ -9,9 +9,6 @@
             <h1 class="page-title">Клиенты</h1>
             <p class="page-subtitle">Управление базой клиентов</p>
         </div>
-        <a href="/clients/new" class="btn btn--primary">
-            <i class="bi bi-person-plus-fill"></i> Новый клиент
-        </a>
     </div>
 
     <!-- Search -->
@@ -36,6 +33,7 @@
                 <div class="empty-state__title">Клиенты не найдены</div>
                 <div style="font-size:.78rem;">Попробуйте изменить поисковый запрос</div>
             </div>
+            <div class="table-wrap">
             <table th:unless="${#lists.isEmpty(clients)}" class="data-table">
                 <thead>
                 <tr>
@@ -81,6 +79,7 @@
                 </tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 

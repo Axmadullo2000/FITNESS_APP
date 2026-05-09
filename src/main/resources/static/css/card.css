@@ -1,147 +1,240 @@
+/* ==========================================================
+   GymApp — card.css  (public /my/{token} QR card page)
+   1Fit-inspired · Dark/Light · Mobile-first
+   ========================================================== */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
+/* ── Theme variables ──────────────────────────────────────── */
+:root {
+  --brand:        #6366F1;
+  --brand-dark:   #4F46E5;
+  --brand-light:  #818CF8;
+  --brand-2:      #8B5CF6;
+  --brand-grad:   linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  --brand-muted:  rgba(99,102,241,.15);
+
+  --success:       #22C55E;
+  --success-muted: rgba(34,197,94,.15);
+  --warning:       #F59E0B;
+  --warning-muted: rgba(245,158,11,.15);
+  --danger:        #EF4444;
+  --danger-muted:  rgba(239,68,68,.15);
+
+  --body-bg:      #0B0B1E;
+  --surface:      #12122A;
+  --surface-2:    #1A1A38;
+  --border:       rgba(255,255,255,.07);
+
+  --text:         #F0F0FF;
+  --text-2:       #C4C4DD;
+  --text-muted:   #7272A0;
+
+  --radius:       20px;
+  --radius-sm:    12px;
+  --shadow:       0 2px 8px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+  --shadow-brand: 0 4px 20px rgba(99,102,241,.4);
+  --transition:   .18s cubic-bezier(.4,0,.2,1);
+}
+
+[data-theme="light"] {
+  --body-bg:      #F0F0FF;
+  --surface:      #FFFFFF;
+  --surface-2:    #F5F5FF;
+  --border:       rgba(79,70,229,.1);
+  --text:         #0F0F2E;
+  --text-2:       #2D2D5E;
+  --text-muted:   #6B6B9A;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; }
 
 body {
-    min-height: 100vh;
-    background: #0A0B14;
-    font-family: 'Inter', system-ui, sans-serif;
-    display: flex; align-items: center; justify-content: center;
-    padding: 1.5rem;
-    -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  background: var(--body-bg);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem 1rem;
+  transition: background var(--transition), color var(--transition);
 }
 
-/* The card */
+/* Theme toggle */
+.btn-theme-card {
+  position: fixed; top: 1rem; right: 1rem;
+  width: 38px; height: 38px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: color var(--transition), background var(--transition);
+  z-index: 100;
+}
+.btn-theme-card:hover { color: var(--brand-light); background: var(--brand-muted); }
+
+/* ── Card wrapper ─────────────────────────────────────────── */
 .gym-card {
-    width: 100%; max-width: 380px;
-    background: linear-gradient(145deg, #111827 0%, #1C1F35 60%, #0D1429 100%);
-    border-radius: 24px;
-    padding: 2rem;
-    border: 1px solid rgba(255,255,255,.07);
-    box-shadow: 0 24px 64px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04);
-    position: relative; overflow: hidden;
-    color: #F9FAFB;
+  width: 100%; max-width: 380px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
 }
 
-/* Decorative glows */
-.gym-card::before {
-    content: '';
-    position: absolute; top: -60px; right: -60px;
-    width: 250px; height: 250px;
-    background: radial-gradient(circle, rgba(249,115,22,.2) 0%, transparent 70%);
-    border-radius: 50%;
+/* Card header — gradient band */
+.gym-card__header {
+  background: var(--brand-grad);
+  padding: 1.75rem 1.75rem 1.25rem;
+  position: relative; overflow: hidden;
 }
 
-.gym-card::after {
-    content: '';
-    position: absolute; bottom: -40px; left: -40px;
-    width: 180px; height: 180px;
-    background: radial-gradient(circle, rgba(139,92,246,.12) 0%, transparent 70%);
-    border-radius: 50%;
+.gym-card__header::before {
+  content: '';
+  position: absolute; top: -60px; right: -40px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,.08);
+  border-radius: 50%;
 }
 
-/* Logo row */
-.card-logo {
-    display: flex; align-items: center; gap: .6rem;
-    margin-bottom: 1.75rem;
-    position: relative; z-index: 1;
+.gym-card__header::after {
+  content: '';
+  position: absolute; bottom: -40px; left: -30px;
+  width: 140px; height: 140px;
+  background: rgba(255,255,255,.05);
+  border-radius: 50%;
 }
 
-.card-logo__icon {
-    width: 32px; height: 32px;
-    background: linear-gradient(135deg, #F97316, #FB923C);
-    border-radius: 9px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; color: #fff;
-    box-shadow: 0 4px 12px rgba(249,115,22,.4);
+.gym-card__brand {
+  display: flex; align-items: center; gap: .625rem;
+  font-size: 1rem; font-weight: 900; color: #fff;
+  margin-bottom: 1.25rem;
+  position: relative; z-index: 1;
 }
 
-.card-logo__name {
-    font-size: .9rem; font-weight: 800; color: #F9FAFB; letter-spacing: -.2px;
+.gym-card__brand-icon {
+  width: 30px; height: 30px;
+  background: rgba(255,255,255,.2);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
 }
 
-/* Avatar */
-.card-avatar {
-    width: 72px; height: 72px; border-radius: 50%;
-    background: linear-gradient(135deg, #F97316, #FB923C);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem; font-weight: 800; color: #fff;
-    margin: 0 auto 1rem;
-    box-shadow: 0 8px 24px rgba(249,115,22,.35);
-    position: relative; z-index: 1;
+.gym-card__name {
+  font-size: 1.5rem; font-weight: 800;
+  color: #fff; letter-spacing: -.3px;
+  margin-bottom: .25rem;
+  position: relative; z-index: 1;
 }
 
-.card-name {
-    font-size: 1.15rem; font-weight: 800; text-align: center;
-    letter-spacing: -.25px; margin-bottom: .25rem;
-    position: relative; z-index: 1;
+.gym-card__phone {
+  font-size: .875rem; color: rgba(255,255,255,.7);
+  position: relative; z-index: 1;
 }
 
-.card-phone {
-    font-size: .8rem; color: rgba(255,255,255,.4);
-    text-align: center; margin-bottom: 1.25rem;
-    position: relative; z-index: 1;
+/* Card body */
+.gym-card__body {
+  padding: 1.5rem 1.75rem;
 }
 
-/* Status */
-.card-status {
-    display: flex; justify-content: center; margin-bottom: 1.5rem;
-    position: relative; z-index: 1;
+/* Info rows grid */
+.gym-card__rows {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
 }
 
-.status-badge {
-    display: inline-flex; align-items: center; gap: .4rem;
-    padding: .35rem 1rem;
-    border-radius: 20px; font-size: .78rem; font-weight: 700;
+.gym-card__row {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .875rem 1rem;
 }
 
-.status-badge--active {
-    background: rgba(34,197,94,.15); color: #4ADE80;
-    border: 1px solid rgba(34,197,94,.3);
+.gym-card__row--full { grid-column: 1 / -1; }
+
+.gym-card__row-label {
+  font-size: .65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--text-muted); margin-bottom: .25rem;
 }
 
-.status-badge--expired {
-    background: rgba(239,68,68,.1); color: #F87171;
-    border: 1px solid rgba(239,68,68,.25);
+.gym-card__row-val {
+  font-size: .95rem; font-weight: 700;
+  color: var(--text);
 }
 
-.status-badge--none {
-    background: rgba(255,255,255,.05); color: rgba(255,255,255,.4);
-    border: 1px solid rgba(255,255,255,.08);
+/* Badge */
+.gym-card__badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .25rem .625rem;
+  border-radius: 99px;
+  font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.gym-card__badge--active  { background: var(--success-muted); color: var(--success); }
+.gym-card__badge--expired { background: var(--danger-muted);  color: var(--danger); }
+.gym-card__badge--none    { background: var(--warning-muted); color: var(--warning); }
+
+/* QR code area */
+.gym-card__qr {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 1.5rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
 }
 
-/* QR */
-.card-qr {
-    background: #fff;
-    border-radius: 16px; padding: .875rem;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 1.25rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,.4);
-    position: relative; z-index: 1;
+.gym-card__qr-label {
+  font-size: .72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
 }
 
-.card-qr img { display: block; width: 100%; max-width: 200px; border-radius: 4px; }
-
-/* Info row */
-.card-info-row {
-    display: flex; gap: 1.5rem;
-    border-top: 1px solid rgba(255,255,255,.07);
-    padding-top: 1rem; margin-top: .25rem;
-    position: relative; z-index: 1;
+.gym-card__qr img {
+  width: 160px; height: 160px;
+  border-radius: 10px;
+  background: #fff;
+  padding: 6px;
+  box-shadow: var(--shadow);
 }
 
-.card-info-item__label {
-    font-size: .62rem; text-transform: uppercase; letter-spacing: .07em;
-    color: rgba(255,255,255,.3); margin-bottom: .2rem;
+.gym-card__qr-hint {
+  font-size: .75rem; color: var(--text-muted);
+  margin-top: .875rem; text-align: center;
 }
 
-.card-info-item__val { font-size: .95rem; font-weight: 700; }
+/* No membership */
+.gym-card__no-membership {
+  text-align: center; padding: 2rem 1.5rem;
+  color: var(--text-muted);
+}
+.gym-card__no-membership i {
+  font-size: 2.5rem; display: block;
+  margin-bottom: .875rem; color: var(--text-muted);
+}
+.gym-card__no-membership p { font-size: .875rem; line-height: 1.5; }
 
-/* Hint */
-.card-hint {
-    text-align: center; font-size: .77rem;
-    color: rgba(255,255,255,.25); margin-top: 1rem;
-    display: flex; align-items: center; justify-content: center;
-    gap: .4rem;
-    position: relative; z-index: 1;
+/* Session bar */
+.sessions-bar-wrap { margin-top: .625rem; }
+.sessions-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: .72rem; color: var(--text-muted);
+  margin-bottom: .4rem;
+}
+.sessions-bar {
+  height: 6px; background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 99px; overflow: hidden;
+}
+.sessions-bar__fill {
+  height: 100%; background: var(--brand-grad);
+  border-radius: 99px;
+  min-width: 4px;
 }

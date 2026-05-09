@@ -29,25 +29,6 @@ public class ClientController {
         return "clients/list";
     }
 
-    @GetMapping("/new")
-    public String newForm(Model model) {
-        model.addAttribute("client", new Client());
-        return "clients/form";
-    }
-
-    @PostMapping("/new")
-    public String processForm(@ModelAttribute Client client,
-                              RedirectAttributes ra) {
-        try {
-            clientService.save(client);
-            ra.addFlashAttribute("success", "Клиент успешно зарегистрирован");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/clients/new";
-        }
-        return "redirect:/clients";
-    }
-
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         Client client = clientService.findById(id);

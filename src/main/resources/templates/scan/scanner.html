@@ -13,7 +13,6 @@
 
 <div class="scanner-logo"><i class="bi bi-activity"></i> GymApp — Вход в зал</div>
 
-<!-- Camera reader -->
 <div class="scanner-box">
     <div class="corner corner--tl"></div>
     <div class="corner corner--tr"></div>
@@ -22,38 +21,31 @@
     <div id="reader"></div>
 </div>
 
-<div class="scanner-hint">
+<div class="scanner-hint" id="scannerHint">
     <i class="bi bi-qr-code-scan"></i>
     Наведите камеру на QR-код клиента
 </div>
 
-<!-- ── Step 1: Locker selection overlay ───────────────────────────────────── -->
+<!-- Locker selection overlay -->
 <div id="locker-overlay" class="locker-overlay">
-
     <div class="locker-overlay__client">
         <div class="locker-overlay__avatar" id="client-initials">АБ</div>
         <div class="locker-overlay__name"   id="client-name">Имя Фамилия</div>
         <div class="locker-overlay__sub">Выберите шкафчик</div>
     </div>
-
     <div class="locker-overlay__label"><i class="bi bi-key"></i> Свободные шкафчики</div>
-
-    <div class="locker-grid" id="locker-grid">
-        <!-- filled by JS -->
-    </div>
-
+    <div class="locker-grid" id="locker-grid"></div>
     <button class="locker-overlay__cancel" id="btn-cancel">
         <i class="bi bi-x-circle"></i> Отмена
     </button>
 </div>
 
-<!-- ── Step 2b: Checkout confirmation overlay ──────────────────────────────── -->
+<!-- Checkout confirmation overlay -->
 <div id="checkout-overlay" class="checkout-overlay">
     <div class="checkout-overlay__icon"><i class="bi bi-box-arrow-right"></i></div>
     <div class="checkout-overlay__name"   id="checkout-name"></div>
     <div class="checkout-overlay__locker" id="checkout-locker"></div>
     <div class="checkout-overlay__sub">Клиент покидает зал</div>
-
     <div class="checkout-overlay__actions">
         <button class="btn-checkout-confirm" id="btn-checkout-confirm">
             <i class="bi bi-check-lg"></i> Подтвердить выход
@@ -64,7 +56,7 @@
     </div>
 </div>
 
-<!-- ── Step 3: Result overlay ─────────────────────────────────────────────── -->
+<!-- Result overlay -->
 <div id="result-overlay" class="result-overlay">
     <div class="result-icon"      id="result-icon"></div>
     <div class="result-name"      id="result-name"></div>
@@ -74,93 +66,105 @@
 </div>
 
 <script>
-    let scanning  = true;
-    let currentToken = null;
+    var scanning     = true;
+    var currentToken = null;
+    var html5QrCode  = new Html5Qrcode("reader");
 
-    const html5QrCode = new Html5Qrcode("reader");
+    /* ── Start camera with fallback ─────────────────────────── */
+    function startScanner(constraints) {
+        html5QrCode.start(
+            constraints,
+            { fps: 10, qrbox: { width: 220, height: 220 } },
+            onScanSuccess,
+            function() {}          /* per-frame error — silently ignore */
+        ).catch(function(err) {
+            if (constraints.facingMode === "environment") {
+                /* Rear camera failed — try front camera */
+                startScanner({ facingMode: "user" });
+            } else if (typeof constraints.facingMode !== "undefined") {
+                /* Front also failed — try without constraint at all */
+                startScanner({});
+            } else {
+                /* Total failure — show error */
+                var hint = document.getElementById("scannerHint");
+                if (hint) hint.innerHTML =
+                    '<i class="bi bi-exclamation-triangle" style="color:#ef4444"></i>' +
+                    ' Камера недоступна. Разрешите доступ к камере и перезагрузите страницу.';
+            }
+        });
+    }
 
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 260, height: 260 } },
-        onScanSuccess,
-        () => {}
-    );
+    startScanner({ facingMode: "environment" });
 
-    // ── Step 1: QR scanned → fetch client + lockers ────────────────────────
+    /* ── QR scanned ─────────────────────────────────────────── */
     function onScanSuccess(decodedText) {
         if (!scanning) return;
         scanning = false;
 
-        const match = decodedText.match(/\/my\/([a-f0-9\-]+)/);
+        var match = decodedText.match(/\/my\/([a-f0-9\-]+)/);
         if (!match) {
             showResult(false, '—', null, 'Неверный QR-код');
             return;
         }
-
         currentToken = match[1];
 
         fetch('/scan/lookup/' + currentToken)
-            .then(r => r.json())
-            .then(data => {
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
                 if (!data.found) {
                     showResult(false, '—', null, data.message || 'Клиент не найден');
                     return;
                 }
-                onScanData(data);
+                if (data.inGym) {
+                    showCheckoutConfirmation(data.name, data.lockerNumber);
+                } else {
+                    showLockerSelection(data);
+                }
             })
-            .catch(() => showResult(false, '—', null, 'Ошибка соединения'));
+            .catch(function() { showResult(false, '—', null, 'Ошибка соединения'); });
     }
 
-    // ── Step 2: Route based on inGym flag ─────────────────────────────────
-    function onScanData(data) {
-        if (data.inGym) {
-            showCheckoutConfirmation(data.name, data.lockerNumber);
-        } else {
-            showLockerSelection(data);
-        }
-    }
-
-    // ── Step 2a: Checkout confirmation overlay ─────────────────────────────
+    /* ── Checkout confirmation ───────────────────────────────── */
     function showCheckoutConfirmation(name, lockerNumber) {
         document.getElementById('checkout-name').textContent   = name;
         document.getElementById('checkout-locker').textContent = 'Шкафчик №' + lockerNumber;
         document.getElementById('checkout-overlay').classList.add('show');
     }
 
-    document.getElementById('btn-checkout-confirm').addEventListener('click', () => {
+    document.getElementById('btn-checkout-confirm').addEventListener('click', function() {
         document.getElementById('checkout-overlay').classList.remove('show');
-
         fetch('/scan/checkout/' + currentToken, { method: 'POST' })
-            .then(r => r.json())
-            .then(data => showResult(data.success, data.name || '', data.lockerNumber || null, data.message))
-            .catch(() => showResult(false, '—', null, 'Ошибка соединения'));
+            .then(function(r) { return r.json(); })
+            .then(function(d) { showResult(d.success, d.name || '', d.lockerNumber || null, d.message); })
+            .catch(function() { showResult(false, '—', null, 'Ошибка соединения'); });
     });
 
-    document.getElementById('btn-checkout-cancel').addEventListener('click', () => {
+    document.getElementById('btn-checkout-cancel').addEventListener('click', function() {
         document.getElementById('checkout-overlay').classList.remove('show');
-        currentToken = null;
-        scanning = true;
+        currentToken = null; scanning = true;
     });
 
-    // ── Step 2b: Show locker selection panel ──────────────────
+    /* ── Locker selection ────────────────────────────────────── */
     function showLockerSelection(data) {
-        const name = data.name || '';
-        const parts = name.trim().split(' ');
-        const initials = parts.map(p => p[0] || '').join('').toUpperCase().slice(0, 2);
+        var name   = data.name || '';
+        var parts  = name.trim().split(' ');
+        var initials = parts.map(function(p) { return p[0] || ''; }).join('').toUpperCase().slice(0, 2);
         document.getElementById('client-initials').textContent = initials;
-        document.getElementById('client-name').textContent = name;
-        const grid = document.getElementById('locker-grid');
+        document.getElementById('client-name').textContent     = name;
+
+        var grid = document.getElementById('locker-grid');
         grid.innerHTML = '';
+
         if (!data.lockers || data.lockers.length === 0) {
-            grid.innerHTML = '<div style="color:#ef4444;font-size:.9rem;">— Нет свободных шкафчиков</div>';
+            grid.innerHTML = '<div style="color:#ef4444;font-size:.9rem;text-align:center;">Нет свободных шкафчиков</div>';
         } else {
-            data.lockers.forEach(locker => {
-                const cell = document.createElement('div');
+            data.lockers.forEach(function(locker) {
+                var cell = document.createElement('div');
                 cell.className = 'locker-cell';
                 cell.innerHTML =
                     '<span class="locker-cell__icon"><i class="bi bi-lock-fill"></i></span>' +
                     '<span class="locker-cell__number">№' + locker.number + '</span>';
-                cell.addEventListener('click', () => confirmCheckin(locker.id, locker.number));
+                cell.addEventListener('click', function() { confirmCheckin(locker.id, locker.number); });
                 grid.appendChild(cell);
             });
         }
@@ -170,30 +174,31 @@
     function confirmCheckin(lockerId, lockerNumber) {
         document.getElementById('locker-overlay').classList.remove('show');
         fetch('/scan/checkin/' + currentToken + '/' + lockerId, { method: 'POST' })
-            .then(r => r.json())
-            .then(data => showResult(data.success, data.name || '', lockerNumber, data.message))
-            .catch(() => showResult(false, '—', null, 'Ошибка соединения'));
+            .then(function(r) { return r.json(); })
+            .then(function(d) { showResult(d.success, d.name || '', lockerNumber, d.message); })
+            .catch(function() { showResult(false, '—', null, 'Ошибка соединения'); });
     }
 
-    document.getElementById('btn-cancel').addEventListener('click', () => {
+    document.getElementById('btn-cancel').addEventListener('click', function() {
         document.getElementById('locker-overlay').classList.remove('show');
-        currentToken = null;
-        scanning = true;
+        currentToken = null; scanning = true;
     });
 
+    /* ── Result ──────────────────────────────────────────────── */
     function showResult(success, name, lockerNumber, message) {
         document.getElementById('locker-overlay').classList.remove('show');
-        const overlay = document.getElementById('result-overlay');
+        var overlay = document.getElementById('result-overlay');
         overlay.className = 'result-overlay show result-overlay--' + (success ? 'success' : 'error');
-        document.getElementById('result-icon').textContent = success ? '✓' : '✗';
-        document.getElementById('result-name').textContent = name;
+        document.getElementById('result-icon').textContent    = success ? '✓' : '✗';
+        document.getElementById('result-name').textContent    = name;
         document.getElementById('result-message').textContent = message;
-        const lockerEl = document.getElementById('result-locker');
+        var lockerEl = document.getElementById('result-locker');
         lockerEl.textContent = (success && lockerNumber) ? 'Шкафчик №' + lockerNumber : '';
-        let sec = 3;
-        const cd = document.getElementById('result-countdown');
+
+        var sec = 3;
+        var cd  = document.getElementById('result-countdown');
         cd.textContent = 'Продолжение через ' + sec + ' сек...';
-        const interval = setInterval(() => {
+        var interval = setInterval(function() {
             sec--;
             cd.textContent = 'Продолжение через ' + sec + ' сек...';
             if (sec <= 0) {
