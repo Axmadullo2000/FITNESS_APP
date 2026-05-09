@@ -9,6 +9,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Getter
@@ -40,6 +41,11 @@ public class Client {
     @Column(nullable = false)
     private Gender gender;
 
+    @Builder.Default
+    @Column(nullable = false, unique = true)
+    private String token = UUID.randomUUID().toString();
+
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 

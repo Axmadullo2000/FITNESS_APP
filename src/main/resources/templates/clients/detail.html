@@ -4,108 +4,124 @@
 <body>
 <div th:fragment="body-content">
 
-    <div class="d-flex align-items-center gap-2 mb-4">
-        <a href="/clients" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i>
+    <div class="page-header">
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <a href="/clients" class="btn btn--ghost btn--sm"><i class="bi bi-arrow-left"></i></a>
+            <div>
+                <h1 class="page-title" th:text="${client.fullName}">Клиент</h1>
+                <p class="page-subtitle">Профиль клиента</p>
+            </div>
+        </div>
+        <a th:href="@{/clients/{id}/qr(id=${client.id})}" target="_blank" class="btn btn--ghost btn--sm">
+            <i class="bi bi-qr-code"></i> QR-код
         </a>
-        <h4 class="fw-bold mb-0" th:text="${client.fullName}"></h4>
-        <span th:if="${client.gender != null}" class="badge"
-              th:classappend="${client.gender.name() == 'MALE'} ? 'bg-primary' : 'bg-danger'">
-            <i th:class="${client.gender.name() == 'MALE'} ? 'bi bi-gender-male' : 'bi bi-gender-female'"></i>
-        </span>
     </div>
 
-    <div class="row g-4">
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:1.5rem;align-items:start;">
 
-        <!-- Левая колонка: инфо + активная карта + оформление -->
-        <div class="col-lg-4">
+        <!-- Left column -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
-            <!-- Данные клиента -->
-            <div class="card shadow-sm mb-3">
-                <div class="card-header fw-semibold">
-                    <i class="bi bi-person me-1"></i>Данные клиента
-                </div>
-                <div class="card-body">
-                    <dl class="row mb-0">
-                        <dt class="col-5 text-muted">Имя</dt>
-                        <dd class="col-7" th:text="${client.firstName}"></dd>
-                        <dt class="col-5 text-muted">Фамилия</dt>
-                        <dd class="col-7" th:text="${client.lastName}"></dd>
-                        <dt class="col-5 text-muted">Пол</dt>
-                        <dd class="col-7">
-                            <span th:if="${client.gender != null}" class="badge"
-                                  th:classappend="${client.gender.name() == 'MALE'} ? 'bg-primary' : 'bg-danger'">
-                                <i th:class="${client.gender.name() == 'MALE'} ? 'bi bi-gender-male' : 'bi bi-gender-female'"></i>
-                                <span th:text="${client.gender.name() == 'MALE'} ? 'Мужской' : 'Женский'"></span>
-                            </span>
-                        </dd>
-                        <dt class="col-5 text-muted">Телефон</dt>
-                        <dd class="col-7" th:text="${client.phone}"></dd>
-                        <dt class="col-5 text-muted">Зарегистрирован</dt>
-                        <dd class="col-7" th:text="${#temporals.format(client.createdAt, 'dd.MM.yyyy')}"></dd>
-                    </dl>
+            <!-- Profile card -->
+            <div class="card">
+                <div class="card-body" style="text-align:center;padding:2rem 1.5rem;">
+                    <div class="client-avatar"
+                         th:classappend="${client.gender != null and client.gender.name() == 'MALE'} ? ' client-avatar--m' : ' client-avatar--f'"
+                         style="width:72px;height:72px;font-size:1.5rem;margin:0 auto 1rem;"
+                         th:text="${#strings.substring(client.firstName,0,1) + #strings.substring(client.lastName,0,1)}">
+                    </div>
+                    <div style="font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:.25rem;"
+                         th:text="${client.fullName}"></div>
+                    <div style="font-size:.82rem;color:var(--text-muted);" th:text="${client.phone}"></div>
+                    <div style="margin-top:1rem;">
+                        <span th:if="${client.gender != null}" class="badge"
+                              th:classappend="${client.gender.name() == 'MALE'} ? ' badge--male' : ' badge--female'">
+                            <i th:class="${client.gender.name() == 'MALE'} ? 'bi bi-gender-male' : 'bi bi-gender-female'"></i>
+                            <span th:text="${client.gender.name() == 'MALE'} ? 'Мужской' : 'Женский'"></span>
+                        </span>
+                    </div>
+                    <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);
+                                display:grid;grid-template-columns:1fr 1fr;gap:.75rem;text-align:left;">
+                        <div>
+                            <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:.2rem;">Имя</div>
+                            <div style="font-weight:600;" th:text="${client.firstName}"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:.2rem;">Фамилия</div>
+                            <div style="font-weight:600;" th:text="${client.lastName}"></div>
+                        </div>
+                        <div style="grid-column:1/-1;">
+                            <div style="font-size:.65rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:.2rem;">Зарегистрирован</div>
+                            <div style="font-weight:600;" th:text="${#temporals.format(client.createdAt, 'dd MMMM yyyy')}"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Активная карта -->
-            <div class="card shadow-sm mb-3" th:if="${activeCard != null}">
-                <div class="card-header fw-semibold d-flex justify-content-between">
-                    <span><i class="bi bi-credit-card me-1"></i>Карта абонемента</span>
-                    <span th:switch="${activeCard.status.name()}">
-                        <span th:case="'ACTIVE'" class="badge bg-success">Активна</span>
-                        <span th:case="'IN_USE'" class="badge bg-warning text-dark">В зале</span>
-                        <span th:case="'EXPIRED'" class="badge bg-secondary">Исчерпана</span>
-                    </span>
+            <!-- Active membership card (visual) -->
+            <div th:if="${activeCard != null}" class="membership-card-visual">
+                <div class="membership-card-visual__logo">
+                    <i class="bi bi-activity"></i> GymApp
                 </div>
-                <div class="card-body">
-                    <!-- Прогресс сеансов -->
-                    <div class="mb-2 d-flex justify-content-between">
-                        <small class="text-muted">Осталось сеансов</small>
-                        <small class="fw-bold">
-                            <span th:text="${activeCard.remainingSessions}"></span>
-                            /
-                            <span th:text="${activeCard.totalSessions}"></span>
-                        </small>
-                    </div>
-                    <div class="progress mb-3" style="height: 12px;">
-                        <div class="progress-bar bg-success" role="progressbar"
+                <div class="membership-card-visual__name" th:text="${client.fullName}"></div>
+                <div class="membership-card-visual__sub">Абонемент активен</div>
+
+                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:1rem;">
+                    <th:block th:each="i : ${#numbers.sequence(1, activeCard.totalSessions)}">
+                        <div class="session-dot"
+                             th:classappend="${i le (activeCard.totalSessions - activeCard.remainingSessions)} ? ' session-dot--used' : ' session-dot--left'">
+                        </div>
+                    </th:block>
+                </div>
+
+                <div style="margin-bottom:.875rem;">
+                    <div class="progress-wrap">
+                        <div class="progress-fill"
+                             th:classappend="${activeCard.remainingSessions > activeCard.totalSessions / 3} ? ' progress-fill--green' : ' progress-fill--orange'"
                              th:style="'width:' + ${(activeCard.remainingSessions * 100) / activeCard.totalSessions} + '%'">
                         </div>
                     </div>
-                    <!-- Крестики / сеансы -->
-                    <div class="d-flex flex-wrap gap-1 mb-1">
-                        <span th:each="i : ${#numbers.sequence(1, activeCard.totalSessions)}">
-                            <i th:if="${i <= (activeCard.totalSessions - activeCard.remainingSessions)}"
-                               class="bi bi-x-circle-fill text-danger"></i>
-                            <i th:unless="${i <= (activeCard.totalSessions - activeCard.remainingSessions)}"
-                               class="bi bi-circle text-success"></i>
-                        </span>
+                </div>
+
+                <div class="membership-card-visual__row">
+                    <div>
+                        <div class="membership-card-visual__lbl">Осталось</div>
+                        <div class="membership-card-visual__val"
+                             th:text="${activeCard.remainingSessions} + ' / ' + ${activeCard.totalSessions}"></div>
                     </div>
-                    <small class="text-muted">
-                        Выдана: <span th:text="${#temporals.format(activeCard.issuedAt, 'dd.MM.yyyy')}"></span>
-                    </small>
+                    <div>
+                        <div class="membership-card-visual__lbl">Статус</div>
+                        <div class="membership-card-visual__val"
+                             th:text="${activeCard.status.name() == 'IN_USE'} ? 'В зале' : 'Активен'"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Нет карты — оформить абонемент -->
-            <div class="card shadow-sm mb-3" th:if="${activeCard == null}">
-                <div class="card-header fw-semibold text-danger">
-                    <i class="bi bi-exclamation-triangle me-1"></i>Нет активного абонемента
+            <!-- No card — issue membership -->
+            <div th:if="${activeCard == null}" class="card">
+                <div class="card-header">
+                    <span class="card-header__title" style="color:var(--danger);">
+                        <i class="bi bi-exclamation-triangle-fill" style="color:var(--danger);"></i>
+                        Нет абонемента
+                    </span>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-3">Выберите тариф и оформите абонемент</p>
+                    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1rem;">
+                        Оформите абонемент для клиента
+                    </p>
                     <form th:action="@{/clients/{id}/membership(id=${client.id})}" method="post">
-                        <div class="mb-3">
-                            <select name="tariffId" class="form-select" required>
-                                <option value="">— Выберите тариф —</option>
+                        <div class="form-group">
+                            <label class="form-label">Выберите тариф</label>
+                            <select name="tariffId" class="form-select" required="required">
+                                <option value="">— Тариф —</option>
                                 <option th:each="t : ${tariffs}"
                                         th:value="${t.id}"
-                                        th:text="${t.displayName + ' — ' + #numbers.formatDecimal(t.price, 0, 'COMMA', 0, 'POINT') + ' сум (' + t.totalSessions + ' сеансов)'}">
+                                        th:text="${t.displayName + ' — ' + #numbers.formatDecimal(t.price,0,'COMMA',0,'POINT') + ' сум (' + t.totalSessions + ' сеансов)'}">
                                 </option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="bi bi-bag-check me-1"></i>Оформить абонемент
+                        <button type="submit" class="btn btn--success" style="width:100%;">
+                            <i class="bi bi-bag-check-fill"></i> Оформить абонемент
                         </button>
                     </form>
                 </div>
@@ -113,53 +129,62 @@
 
         </div>
 
-        <!-- Правая колонка: история -->
-        <div class="col-lg-8">
+        <!-- Right column -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
-            <!-- История абонементов -->
-            <div class="card shadow-sm mb-3">
-                <div class="card-header fw-semibold">
-                    <i class="bi bi-card-list me-1"></i>История абонементов
+            <!-- Membership history -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-header__title">
+                        <i class="bi bi-card-list"></i> История абонементов
+                    </span>
                 </div>
-                <div class="card-body p-0">
-                    <div th:if="${#lists.isEmpty(memberships)}" class="text-muted p-3">
-                        Нет абонементов
+                <div class="card-body-0">
+                    <div th:if="${#lists.isEmpty(memberships)}" class="empty-state" style="padding:2.5rem;">
+                        <i class="bi bi-credit-card"></i>
+                        <div class="empty-state__title">Нет абонементов</div>
                     </div>
-                    <table th:unless="${#lists.isEmpty(memberships)}" class="table table-sm mb-0">
-                        <thead class="table-light">
+                    <table th:unless="${#lists.isEmpty(memberships)}" class="data-table">
+                        <thead>
                         <tr>
                             <th>Тариф</th>
-                            <th>Сеансы</th>
+                            <th>Сеансов</th>
                             <th>Статус</th>
                             <th>Дата</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="m : ${memberships}">
-                            <td th:text="${m.tariff.displayName}"></td>
+                            <td style="font-weight:600;" th:text="${m.tariff.displayName}"></td>
                             <td th:text="${m.tariff.totalSessions}"></td>
                             <td>
-                                <span th:if="${m.status.name() == 'ACTIVE'}" class="badge bg-success">Активен</span>
-                                <span th:unless="${m.status.name() == 'ACTIVE'}" class="badge bg-secondary">Истёк</span>
+                                <span th:if="${m.status.name() == 'ACTIVE'}" class="badge badge--green">Активен</span>
+                                <span th:if="${m.status.name() == 'IN_USE'}" class="badge badge--orange">В зале</span>
+                                <span th:if="${m.status.name() == 'EXPIRED'}" class="badge badge--gray">Истёк</span>
                             </td>
-                            <td th:text="${#temporals.format(m.createdAt, 'dd.MM.yyyy')}"></td>
+                            <td style="color:var(--text-muted);"
+                                th:text="${#temporals.format(m.createdAt, 'dd.MM.yyyy')}"></td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- История визитов -->
-            <div class="card shadow-sm">
-                <div class="card-header fw-semibold">
-                    <i class="bi bi-clock-history me-1"></i>История посещений
+            <!-- Visit history -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-header__title">
+                        <i class="bi bi-clock-history"></i> История посещений
+                    </span>
+                    <span class="badge badge--gray" th:text="${#lists.size(visits)} + ' визитов'"></span>
                 </div>
-                <div class="card-body p-0">
-                    <div th:if="${#lists.isEmpty(visits)}" class="text-muted p-3">
-                        Нет посещений
+                <div class="card-body-0">
+                    <div th:if="${#lists.isEmpty(visits)}" class="empty-state" style="padding:2.5rem;">
+                        <i class="bi bi-calendar-x"></i>
+                        <div class="empty-state__title">Нет посещений</div>
                     </div>
-                    <table th:unless="${#lists.isEmpty(visits)}" class="table table-sm mb-0">
-                        <thead class="table-light">
+                    <table th:unless="${#lists.isEmpty(visits)}" class="data-table">
+                        <thead>
                         <tr>
                             <th>Дата</th>
                             <th>Вход</th>
@@ -170,13 +195,23 @@
                         </thead>
                         <tbody>
                         <tr th:each="v : ${visits}">
-                            <td th:text="${#temporals.format(v.checkIn, 'dd.MM.yyyy')}"></td>
+                            <td style="font-weight:600;" th:text="${#temporals.format(v.checkIn, 'dd MMM yyyy')}"></td>
                             <td th:text="${#temporals.format(v.checkIn, 'HH:mm')}"></td>
-                            <td th:text="${v.checkOut != null ? #temporals.format(v.checkOut, 'HH:mm') : '—'}"></td>
-                            <td>№<span th:text="${v.locker.lockerNumber}"></span></td>
+                            <td style="color:var(--text-muted);"
+                                th:text="${v.checkOut != null ? #temporals.format(v.checkOut,'HH:mm') : '—'}"></td>
                             <td>
-                                <span th:if="${v.status.name() == 'OPEN'}" class="badge bg-warning text-dark">В зале</span>
-                                <span th:unless="${v.status.name() == 'OPEN'}" class="badge bg-light text-dark border">Завершён</span>
+                                <span class="badge badge--orange">
+                                    <i class="bi bi-key"></i>
+                                    <span th:text="${v.locker.lockerNumber}"></span>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${v.status.name() == 'OPEN'}" class="badge badge--green">
+                                    <i class="bi bi-circle-fill" style="font-size:.4rem;"></i> В зале
+                                </span>
+                                <span th:unless="${v.status.name() == 'OPEN'}" class="badge badge--gray">
+                                    Завершён
+                                </span>
                             </td>
                         </tr>
                         </tbody>

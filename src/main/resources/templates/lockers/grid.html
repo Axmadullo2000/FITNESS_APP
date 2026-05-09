@@ -4,109 +4,100 @@
 <body>
 <div th:fragment="body-content">
 
-    <h4 class="fw-bold mb-4"><i class="bi bi-key me-2"></i>Шкафчики</h4>
-
-    <!-- Статистика -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card card-stat shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1"><i class="bi bi-gender-male me-1"></i>Муж. свободно</h6>
-                            <h3 class="fw-bold text-primary mb-0" th:text="${maleFreeCount}"></h3>
-                        </div>
-                        <i class="bi bi-check-circle fs-1 text-primary opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card card-stat shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1"><i class="bi bi-gender-male me-1"></i>Муж. занято</h6>
-                            <h3 class="fw-bold text-warning mb-0" th:text="${maleOccupiedCount}"></h3>
-                        </div>
-                        <i class="bi bi-lock fs-1 text-warning opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card card-stat shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1"><i class="bi bi-gender-female me-1"></i>Жен. свободно</h6>
-                            <h3 class="fw-bold text-danger mb-0" th:text="${femaleFreeCount}"></h3>
-                        </div>
-                        <i class="bi bi-check-circle fs-1 text-danger opacity-50"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card card-stat shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-muted mb-1"><i class="bi bi-gender-female me-1"></i>Жен. занято</h6>
-                            <h3 class="fw-bold text-warning mb-0" th:text="${femaleOccupiedCount}"></h3>
-                        </div>
-                        <i class="bi bi-lock fs-1 text-warning opacity-50"></i>
-                    </div>
-                </div>
-            </div>
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Шкафчики</h1>
+            <p class="page-subtitle">Карта шкафчиков раздевалок</p>
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- Мужские шкафчики -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-header fw-semibold bg-primary text-white">
-                    <i class="bi bi-gender-male me-1"></i>Мужские шкафчики (1-50)
-                </div>
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        <div th:each="locker : ${maleLockers}"
-                             th:classappend="${locker.status.name() == 'FREE'} ? 'bg-success' : 'bg-warning'"
-                             class="d-flex flex-column align-items-center justify-content-center text-white rounded"
-                             style="width: 50px; height: 50px; font-weight: bold;">
-                            <span th:text="${locker.lockerNumber}"></span>
-                            <small th:if="${locker.status.name() == 'OCCUPIED'}" class="text-dark" style="font-size: 0.6rem;">занят</small>
-                        </div>
-                    </div>
-                </div>
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem;">
+        <div class="stat-card stat-card--blue">
+            <div class="stat-card__body">
+                <div class="stat-card__label">Муж. свободно</div>
+                <div class="stat-card__value" th:text="${maleFreeCount}">0</div>
             </div>
+            <div class="stat-card__icon"><i class="bi bi-gender-male"></i></div>
         </div>
-
-        <!-- Женские шкафчики -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm">
-                <div class="card-header fw-semibold bg-danger text-white">
-                    <i class="bi bi-gender-female me-1"></i>Женские шкафчики (51-100)
-                </div>
-                <div class="card-body">
-                    <div class="d-flex flex-wrap gap-2">
-                        <div th:each="locker : ${femaleLockers}"
-                             th:classappend="${locker.status.name() == 'FREE'} ? 'bg-success' : 'bg-warning'"
-                             class="d-flex flex-column align-items-center justify-content-center text-white rounded"
-                             style="width: 50px; height: 50px; font-weight: bold;">
-                            <span th:text="${locker.lockerNumber}"></span>
-                            <small th:if="${locker.status.name() == 'OCCUPIED'}" class="text-dark" style="font-size: 0.6rem;">занят</small>
-                        </div>
-                    </div>
-                </div>
+        <div class="stat-card stat-card--orange">
+            <div class="stat-card__body">
+                <div class="stat-card__label">Муж. занято</div>
+                <div class="stat-card__value" th:text="${maleOccupiedCount}">0</div>
             </div>
+            <div class="stat-card__icon"><i class="bi bi-lock-fill"></i></div>
+        </div>
+        <div class="stat-card stat-card--purple">
+            <div class="stat-card__body">
+                <div class="stat-card__label">Жен. свободно</div>
+                <div class="stat-card__value" th:text="${femaleFreeCount}">0</div>
+            </div>
+            <div class="stat-card__icon"><i class="bi bi-gender-female"></i></div>
+        </div>
+        <div class="stat-card stat-card--red">
+            <div class="stat-card__body">
+                <div class="stat-card__label">Жен. занято</div>
+                <div class="stat-card__value" th:text="${femaleOccupiedCount}">0</div>
+            </div>
+            <div class="stat-card__icon"><i class="bi bi-lock-fill"></i></div>
         </div>
     </div>
 
-    <div class="mt-3 d-flex gap-3">
-        <span><span class="badge bg-success">&nbsp;</span> Свободен</span>
-        <span><span class="badge bg-warning">&nbsp;</span> Занят</span>
+    <!-- Legend -->
+    <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text-muted);">
+            <div style="width:14px;height:14px;border-radius:3px;background:var(--success-muted);border:2px solid var(--success);"></div>
+            Свободен
+        </div>
+        <div style="display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text-muted);">
+            <div style="width:14px;height:14px;border-radius:3px;background:var(--warning-muted);border:2px solid var(--warning);"></div>
+            Занят
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+
+        <!-- Men's -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-header__title">
+                    <i class="bi bi-gender-male" style="color:var(--info);"></i>
+                    Мужские шкафчики (1–50)
+                </span>
+                <span class="badge badge--blue">
+                    <span th:text="${maleFreeCount}"></span> свободно
+                </span>
+            </div>
+            <div class="locker-map">
+                <div th:each="locker : ${maleLockers}"
+                     class="locker-cell"
+                     th:classappend="${locker.status.name() == 'FREE'} ? ' locker-cell--free' : ' locker-cell--occupied'">
+                    <i th:class="${locker.status.name() == 'FREE'} ? 'bi bi-unlock' : 'bi bi-lock-fill'"></i>
+                    <span th:text="${locker.lockerNumber}"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Women's -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-header__title">
+                    <i class="bi bi-gender-female" style="color:#EC4899;"></i>
+                    Женские шкафчики (1–50)
+                </span>
+                <span class="badge badge--female">
+                    <span th:text="${femaleFreeCount}"></span> свободно
+                </span>
+            </div>
+            <div class="locker-map">
+                <div th:each="locker : ${femaleLockers}"
+                     class="locker-cell"
+                     th:classappend="${locker.status.name() == 'FREE'} ? ' locker-cell--free' : ' locker-cell--occupied'">
+                    <i th:class="${locker.status.name() == 'FREE'} ? 'bi bi-unlock' : 'bi bi-lock-fill'"></i>
+                    <span th:text="${locker.lockerNumber}"></span>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

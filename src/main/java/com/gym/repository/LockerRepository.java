@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface LockerRepository extends JpaRepository<Locker, Long> {
 
     Optional<Locker> findFirstByStatus(LockerStatus status);
+    Optional<Locker> findFirstByStatusAndGender(LockerStatus status, Gender gender);
     Long countByStatus(LockerStatus status);
 
     List<Locker> findByGenderAndStatusOrderByLockerNumber(Gender gender, LockerStatus status);
