@@ -1,17 +1,8 @@
-# GymApp
+# GymApp — Fitness Club Management System
 
-https://fitnessapp-production-1452.up.railway.app
-A gym management web application built with Spring Boot and Thymeleaf. Handles client registration, membership cards, locker assignment, and real-time check-in / check-out tracking.
+A web-based management system for a fitness club built with Spring Boot. Covers the full client lifecycle: registration, membership assignment, locker management, visit tracking, and QR-based check-in/check-out via tablet scanner.
 
----
-
-## Features
-
-- **Client management** — register clients with personal info and gender, search by name or phone
-- **Memberships & cards** — 4 tariff types (daily / alternate × with trainer / without), 12 or 24 sessions per card, 30-day expiry
-- **Check-in / Check-out** — assign a locker on entry, free it on exit, track who is in the gym right now
-- **Locker management** — 100 lockers split into male (1–50) and female (51–100) sections, visual grid showing free / occupied status
-- **Dashboard** — live stats: total clients, visitors in gym, free and occupied lockers
+Live demo: https://fitnessapp-production-1452.up.railway.app
 
 ---
 
@@ -19,11 +10,52 @@ A gym management web application built with Spring Boot and Thymeleaf. Handles c
 
 | Layer | Technology |
 |---|---|
-| Backend | Spring Boot 3.2, Spring MVC, Spring Data JPA |
-| Frontend | Thymeleaf, Bootstrap 5, Bootstrap Icons |
-| Database | H2 (file-based, persisted) |
+| Backend | Java 17, Spring Boot 3.5 |
+| Security | Spring Security 6, role-based (ADMIN / CLIENT) |
+| Persistence | Spring Data JPA, Hibernate, PostgreSQL |
+| Frontend | Thymeleaf 3, custom CSS design system |
+| QR Codes | ZXing 3.5 (generation), html5-qrcode (scanning) |
 | Build | Maven |
-| Java | 17 |
+| Containerization | Docker (multi-stage build) |
+
+---
+
+## Features
+
+### Admin panel
+- **Dashboard** — live stats: active clients, open visits, free/occupied lockers
+- **Client management** — create and view client profiles, search by name or phone
+- **Memberships** — assign tariffs, track start/end dates and remaining sessions
+- **Manual check-in / check-out** — locker assignment on entry, release on exit
+- **Locker map** — visual grid (100 lockers, split male/female), color-coded by status
+- **QR scanner** — tablet-friendly page for self-service entry; client shows QR → system opens the visit automatically
+
+### Client cabinet
+- Personal page showing active membership, tariff details, and expiry date
+- **QR card** — full-screen QR code for showing at the entrance scanner
+
+---
+
+## Domain Model
+
+```
+AppUser     — system account (ADMIN / CLIENT role), phone-based login
+Client      — gym member profile (name, phone, gender, birthday)
+Tariff      — pricing plan (type, price, duration in days)
+MemberShip  — links a client to a tariff, tracks start/end dates and status
+Card        — scannable QR card tied to a membership (ACTIVE → IN_USE → EXPIRED)
+Visit       — single gym entry (OPEN while inside, CLOSED on exit)
+Locker      — physical locker 1–100 (FREE / OCCUPIED), assigned during check-in
+```
+
+**Tariff types**
+
+| Type | Description |
+|---|---|
+| `EVERY_DAY_WITH_TRAINER` | Every day + trainer |
+| `EVERY_DAY_NO_TRAINER` | Every day, no trainer |
+| `EVEY_OTHER_DAY_WITH_TRAINER` | 3 times per week + trainer |
+| `EVEY_OTHER_DAY_NO_TRAINER` | 3 times per week, no trainer |
 
 ---
 
@@ -32,46 +64,72 @@ A gym management web application built with Spring Boot and Thymeleaf. Handles c
 ### Prerequisites
 
 - Java 17+
+- PostgreSQL 14+
 - Maven 3.8+
 
-### Run
+### 1. Create the database
 
-```bash
-git clone <repo-url>
-cd gym-app
-mvn spring-boot:run
+```sql
+CREATE DATABASE fitness_app;
 ```
 
-Open [http://localhost:8080](http://localhost:8080) in your browser.
+### 2. Configure credentials
 
-### Database
+Edit `src/main/resources/application-dev.properties`:
 
-The app uses an H2 file database stored at `./data/gymdb`. The schema is created automatically on first run via `spring.jpa.hibernate.ddl-auto=update`.
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/fitness_app
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+```
 
-To inspect the database directly, open the H2 console at [http://localhost:8080/h2-console](http://localhost:8080/h2-console):
+### 3. Run
 
-| Field | Value |
-|---|---|
-| JDBC URL | `jdbc:h2:file:./data/gymdb` |
-| Username | `sa` |
-| Password | _(empty)_ |
+```bash
+./mvnw spring-boot:run
+```
+
+The app starts at `http://localhost:8080`.
+
+On first run, `DataInitializer` seeds the database with default tariffs, 100 lockers (1–50 male / 51–100 female), and a default admin account.
+
+**Default admin credentials:**
+```
+Phone:    +998 90 000 00 00
+Password: admin123
+```
 
 ---
 
-## Seed Data
+## Running with Docker
 
-On startup, `DataInitializer` automatically creates:
+```bash
+docker build -t gymapp .
 
-**4 tariffs**
+docker run -p 8080:8080 \
+  -e DATABASE_URL=jdbc:postgresql://host:5432/fitness_app \
+  -e PGUSER=postgres \
+  -e PGPASSWORD=secret \
+  gymapp
+```
 
-| Name | Sessions | Type |
+---
+
+## URL Map
+
+| URL | Role | Description |
 |---|---|---|
-| Ежедневно с тренером | 12 | EVERY_DAY_WITH_TRAINER |
-| Ежедневно без тренера | 12 | EVERY_DAY_NO_TRAINER |
-| Через день с тренером | 24 | ALTERNATE_WITH_TRAINER |
-| Через день без тренера | 24 | ALTERNATE_NO_TRAINER |
-
-**100 lockers** (1–50 male, 51–100 female), all FREE on first run
+| `/login` | Public | Login page (phone + password) |
+| `/register` | Public | Client self-registration |
+| `/dashboard` | Admin | Stats overview |
+| `/clients` | Admin | Client list with search |
+| `/clients/{id}` | Admin | Client detail, membership, QR |
+| `/lockers` | Admin | Locker map |
+| `/visits/checkin/{id}` | Admin | Manual check-in |
+| `/visits/checkout/{id}` | Admin | Manual check-out |
+| `/scan` | Admin | QR scanner (tablet) |
+| `/my/cabinet` | Client | Personal cabinet |
+| `/my/card` | Client | QR card full-screen |
 
 ---
 
@@ -79,70 +137,56 @@ On startup, `DataInitializer` automatically creates:
 
 ```
 src/main/java/com/gym/
-├── config/
-│   └── DataInitializer.java       # Seeds tariffs and lockers on startup
-├── controller/
-│   ├── DashboardController.java
-│   ├── ClientController.java
-│   ├── VisitController.java
-│   └── LockerController.java
-├── entity/
-│   ├── Client.java
-│   ├── Tariff.java
-│   ├── Membership.java
-│   ├── Card.java
-│   ├── Locker.java
-│   ├── Visit.java
-│   └── enums/  (CardStatus, MembershipStatus, LockerStatus, VisitStatus, TariffType, Gender)
-├── repository/
-│   ├── ClientRepository.java
-│   ├── MembershipRepository.java
-│   ├── CardRepository.java
-│   ├── LockerRepository.java
-│   ├── VisitRepository.java
-│   └── TariffRepository.java
-└── service/
-    ├── ClientService.java
-    ├── MembershipService.java
-    ├── VisitService.java
-    └── LockerService.java
+├── config/          # SecurityConfig, DataInitializer, WebConfig
+├── controller/      # MVC controllers (Auth, Client, Dashboard, Locker, QR, Scan, Visit)
+├── entity/          # JPA entities
+│   └── types/       # Enums: CardStatus, VisitStatus, LockerStatus, TariffType, Gender
+├── repository/      # Spring Data JPA repositories
+├── service/         # Service interfaces
+│   └── impl/        # Implementations
+└── util/            # PhoneUtils — normalizes phone numbers before save/login
 
 src/main/resources/
-├── templates/
-│   ├── fragments/layout.html      # Shared navbar + sidebar layout
-│   ├── dashboard.html
-│   ├── clients/
-│   │   ├── list.html
-│   │   ├── form.html
-│   │   └── detail.html
-│   ├── visits/
-│   │   └── checkin.html
-│   └── lockers/
-│       └── list.html
-└── static/css/
-    └── app.css                    # Custom design system
+├── templates/       # Thymeleaf HTML templates
+└── static/css/      # app.css, auth.css, cabinet.css, card.css, scanner.css
 ```
 
 ---
 
-## Card Expiry Rules
+## Profiles
 
-A membership card expires when **either** condition is met:
+| Profile | Purpose |
+|---|---|
+| `dev` (default) | Local PostgreSQL, credentials in `application-dev.properties` |
+| `prod` | Reads `DATABASE_URL`, `PGUSER`, `PGPASSWORD` from environment variables |
 
-- All sessions have been used (`remainingSessions == 0`)
-- 30 days have passed since the card was issued (`now > expiresAt`)
-
-Expiry is checked automatically on each check-in. When a card expires, both the card status and the membership status are set to `EXPIRED`.
+Switch in `application.properties`:
+```properties
+spring.profiles.active=prod
+```
 
 ---
 
-## Pages
+## Card & Visit Logic
 
-| URL | Description |
-|---|---|
-| `/` | Dashboard — live stats and current visitors |
-| `/clients` | Client list with search |
-| `/clients/new` | Register new client |
-| `/clients/{id}` | Client detail — card, sessions, membership history |
-| `/visits` | Check-in / Check-out |
-| `/lockers` | Locker grid — male and female sections |
+- A card is created `ACTIVE` when a membership is assigned.
+- On QR scan or manual check-in: card moves to `IN_USE`, a `Visit` record opens (`OPEN`), a locker is assigned.
+- On check-out: visit closes (`CLOSED`), locker is freed, card returns to `ACTIVE` (or `EXPIRED` if sessions/days are exhausted).
+- A card expires when all sessions are used **or** the membership period ends.
+
+---
+
+## MVP Limitations
+
+- No email or SMS notifications
+- No payment processing integration
+- No multi-branch support
+- Tariff prices are set at initialization; no in-app editor
+- No mobile app — the UI is responsive but browser-based
+
+---
+
+## Documentation
+
+- [`GymApp_Documentation.docx`](GymApp_Documentation.docx) — full technical documentation in Russian
+- [`GymApp_Guide.pptx`](GymApp_Guide.pptx) — non-technical user guide for admins and clients (Russian, 20 slides)
