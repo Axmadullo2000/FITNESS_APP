@@ -31,7 +31,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-//        initAdmin();
+        initAdmin();
         initTariffs();
         initLockers();
     }
@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
     private void initAdmin() {
         if (!appUserRepository.existsByUsername("+998998266611")) {
             appUserRepository.save(AppUser.builder()
-                    .username("admin")
+                    .username("+998998266611")
                     .password(passwordEncoder.encode("admin123"))
                     .role("ROLE_ADMIN")
                     .build());

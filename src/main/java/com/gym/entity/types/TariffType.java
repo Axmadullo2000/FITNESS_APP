@@ -1,5 +1,8 @@
 package com.gym.entity.types;
 
+import lombok.Getter;
+
+@Getter
 public enum TariffType {
     EVERY_DAY_WITH_TRAINER("Каждый день + тренер"),
     EVERY_DAY_NO_TRAINER("Каждый день, без тренера"),
@@ -12,7 +15,4 @@ public enum TariffType {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
 }
