@@ -1,7 +1,6 @@
 # GymApp
 
-https://fitness-app-md0t.onrender.com/
-
+https://fitnessapp-production-1452.up.railway.app
 A gym management web application built with Spring Boot and Thymeleaf. Handles client registration, membership cards, locker assignment, and real-time check-in / check-out tracking.
 
 ---
